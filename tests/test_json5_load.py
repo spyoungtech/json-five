@@ -43,3 +43,15 @@ def test_object_with_multiline_comment():
     }"""
     assert loads(json_string) == {'foo': 'bar'}
 
+def test_nested_object():
+    json_string = """{"foo": {"bacon": "eggs"}}"""
+    assert loads(json_string) == {'foo': {'bacon': 'eggs'}}
+
+def test_leading_whitespace_object():
+    json_string = """   {"foo":"bar"}"""
+    assert loads(json_string) == {'foo': 'bar'}
+
+def test_trailing_whitespace_object():
+    json_string = """{"foo": "bar"}   """
+    assert loads(json_string) == {'foo': 'bar'}
+
