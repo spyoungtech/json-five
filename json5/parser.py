@@ -7,7 +7,7 @@ class JSONParser(Parser):
     tokens = JSONLexer.tokens
 
 
-    @_('value')
+    @_('value { WHITESPACE }')
     def text(self, p):
         return JSONText(value=p[0])
 
