@@ -80,19 +80,33 @@ class JSONParser(Parser):
     def value(self, p):
         return UnaryOp(op='+', value=p.number)
 
-    @_('DOUBLE_QUOTE { DOUBLE_QUOTE_STRING_CHAR } DOUBLE_QUOTE')
+    # @_('DOUBLE_QUOTE { DOUBLE_QUOTE_STRING_CHAR } DOUBLE_QUOTE')
+    # def string(self, p):
+    #     print(p.DOUBLE_QUOTE_STRING_CHAR)
+    #     return DoubleQuotedString(*p.DOUBLE_QUOTE_STRING_CHAR)
+    #
+    # @_('SINGLE_QUOTE_STRING_CHAR { SINGLE_QUOTE_STRING_CHAR }')
+    # def single_quote_string_content(self, p):
+    #     return p.SINGLE_QUOTE_STRING_CHAR0 + ''.join(p.SINGLE_QUOTE_STRING_CHAR1)
+    #
+    # @_('SINGLE_QUOTE [ single_quote_string_content ] SINGLE_QUOTE')
+    # def string(self, p):
+    #     return SingleQuotedString(*p.single_quote_string_content)
+
+    @_('DOUBLE_QUOTE_STRING')
+    def double_quoted_string(self, p):
+        contents = p[0][1:-1]
+        return DoubleQuotedString(*contents)
+
+    @_("SINGLE_QUOTE_STRING")
+    def single_quoted_string(self, p):
+        contents = p[0][1:-1]
+        return SingleQuotedString(*contents)
+
+    @_('double_quoted_string',
+       'single_quoted_string')
     def string(self, p):
-        print(p.DOUBLE_QUOTE_STRING_CHAR)
-        return DoubleQuotedString(*p.DOUBLE_QUOTE_STRING_CHAR)
-
-    @_('SINGLE_QUOTE_STRING_CHAR { SINGLE_QUOTE_STRING_CHAR }')
-    def single_quote_string_content(self, p):
-        return p.SINGLE_QUOTE_STRING_CHAR0 + ''.join(p.SINGLE_QUOTE_STRING_CHAR1)
-
-    @_('SINGLE_QUOTE [ single_quote_string_content ] SINGLE_QUOTE')
-    def string(self, p):
-        return SingleQuotedString(*p.single_quote_string_content)
-
+        return p[0]
 
     @_('TRUE')
     def value(self, p):

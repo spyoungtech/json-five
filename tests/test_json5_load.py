@@ -55,3 +55,10 @@ def test_trailing_whitespace_object():
     json_string = """{"foo": "bar"}   """
     assert loads(json_string) == {'foo': 'bar'}
 
+def test_single_quoted_string():
+    json_string = """{'foo': 'bar'}"""
+    assert loads(json_string) == {'foo': 'bar'}
+
+def test_mixed_usage_quotes():
+    json_string = """{"foo": 'bar'}"""
+    assert loads(json_string) == {'foo': 'bar'}

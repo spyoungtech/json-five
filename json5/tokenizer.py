@@ -10,8 +10,9 @@ class JSONLexer(Lexer):
               LBRACKET, RBRACKET,
               PLUS, MINUS,
               FLOAT, INTEGER,
-              DOUBLE_QUOTE, SINGLE_QUOTE,
-              DOUBLE_QUOTE_STRING_CHAR, SINGLE_QUOTE_STRING_CHAR,
+              #DOUBLE_QUOTE, SINGLE_QUOTE,
+              #DOUBLE_QUOTE_STRING_CHAR, SINGLE_QUOTE_STRING_CHAR,
+              DOUBLE_QUOTE_STRING, SINGLE_QUOTE_STRING,
               # DECIMAL,
               NAME,
               COMMA,
@@ -52,12 +53,15 @@ class JSONLexer(Lexer):
     COLON = r"\:"
     COMMA = r"\,"
 
-    DOUBLE_QUOTE = r'\"'
-    SINGLE_QUOTE = r"\'"
+    DOUBLE_QUOTE_STRING = r'\"[^\"]+\"'
+    SINGLE_QUOTE_STRING = r"\'[^\']+\'"
+
+    # DOUBLE_QUOTE = r'\"'
+    # SINGLE_QUOTE = r"\'"
     WHITESPACE = "[\u0009\u000A\u000B\u000C\u000D\u0020\u00A0\u2028\u2029\ufeff]+"
 
-    DOUBLE_QUOTE_STRING_CHAR = r'[^\"]'  # needs work for escapes
-    SINGLE_QUOTE_STRING_CHAR = r"[^\']"  # needs work for escapes
+    # DOUBLE_QUOTE_STRING_CHAR = r'[^\"]'  # needs work for escapes
+    # SINGLE_QUOTE_STRING_CHAR = r"[^\']"  # needs work for escapes
     # UNDERSCORE = r"_"
     FLOAT = r'(\d+\.\d*)|(\d*\.\d+)'      # 23.45
     INTEGER = r'\d+'
