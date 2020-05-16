@@ -135,3 +135,9 @@ class UnaryOp(Value):
         assert op in ('-', '+')
         assert isinstance(value, Number)
         super().__init__(op=op, value=value)
+
+
+class CommentOrWhiteSpace(Node):
+    def __init__(self, value):
+        assert isinstance(value, str), f"Expected str got {type(value)}"
+        super().__init__(value=value)

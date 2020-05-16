@@ -1,11 +1,15 @@
 import re
-
 import sys
-
 from sly import Lexer
 
+import logging
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler(stream=sys.stderr))
+logger.setLevel(level=logging.DEBUG)
+
 class JSONLexer(Lexer):
-    reflags = re.MULTILINE
+    # reflags = re.MULTILINE
     tokens = {LBRACE, RBRACE,
               LBRACKET, RBRACKET,
               PLUS, MINUS,
@@ -18,26 +22,17 @@ class JSONLexer(Lexer):
               COMMA,
               # DOLLAR,
               # UNDERSCORE,
-              # LINE_COMMENT_START, BLOCK_COMMENT_START, BLOCK_COMMENT_END,
+              #LINE_COMMENT_START, BLOCK_COMMENT_START, BLOCK_COMMENT_END,
+              BLOCK_COMMENT,
+              LINE_COMMENT,
               WHITESPACE,
               TRUE, FALSE, NULL,
               COLON,
 
               # RESERVED KEYWORDS
-              BREAK,DO,INSTANCEOF,TYPEOF,CASE,ELSE,NEW,VAR,CATCH,FINALLY,RETURN,VOID,CONTINUE,FOR,SWITCH,WHILE,DEBUGGER,FUNCTION,THIS,WITH,DEFAULT,IF,THROW,DELETE,IN,TRY,
+              BREAK, DO, INSTANCEOF, TYPEOF, CASE, ELSE, NEW, VAR, CATCH, FINALLY, RETURN, VOID, CONTINUE, FOR, SWITCH, WHILE, DEBUGGER, FUNCTION, THIS, WITH, DEFAULT, IF, THROW, DELETE, IN, TRY,
               }
 
-    ignore_line_comment = r'//.*'
-
-
-    @_(r'\n+')
-    def ignore_newline(self, tok):
-        self.lineno += tok.value.count('\n')
-
-
-    @_(r'/\*((.|\n))*?\*/')
-    def ignore_block_comment(self, tok):
-        self.lineno += tok.value.count('\n')
 
 
     #ignore_line_comment_eof = r'//.*$'
@@ -58,16 +53,18 @@ class JSONLexer(Lexer):
 
     # DOUBLE_QUOTE = r'\"'
     # SINGLE_QUOTE = r"\'"
+    LINE_COMMENT = r"//.*"
+    _BLOCK_COMMENT_START = r"\/\*"
+    _BLOCK_COMMENT_END = r"\*\/"
+    BLOCK_COMMENT = r'/\*((.|\n))*?\*/'
     WHITESPACE = "[\u0009\u000A\u000B\u000C\u000D\u0020\u00A0\u2028\u2029\ufeff]+"
+    print(repr(BLOCK_COMMENT))
 
     # DOUBLE_QUOTE_STRING_CHAR = r'[^\"]'  # needs work for escapes
     # SINGLE_QUOTE_STRING_CHAR = r"[^\']"  # needs work for escapes
     # UNDERSCORE = r"_"
     FLOAT = r'(\d+\.\d*)|(\d*\.\d+)'      # 23.45
     INTEGER = r'\d+'
-    # LINE_COMMENT_START = r"\/\/"
-    # BLOCK_COMMENT_START = r"\/\*"
-    # BLOCK_COMMENT_END = r"\*\/"
     NAME = r'[a-zA-Z_\$]([a-zA-Z_\d\$])*'
 
     NAME['true'] = TRUE
@@ -107,11 +104,13 @@ class JSONLexer(Lexer):
 
 def tokenize(text):
     lexer = JSONLexer()
+    tokens = lexer.tokenize(text)
+    for tok in tokens:
+        logger.debug(tok)
     return lexer.tokenize(text)
 
 if __name__ == '__main__':
     fp = sys.argv[1]
     with open(fp) as f:
         text = f.read()
-    for tok in tokenize(text):
-        print(tok)
+    tokenize(text)

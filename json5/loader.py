@@ -17,7 +17,7 @@ class JsonIdentifier(UserString):
 def loads(s):
     environment = {}
     model = parse_source(s)
-    #logger.debug('Model is %r', model)
+    # logger.debug('Model is %r', model)
     return _load(model, environment)
 
 
@@ -79,6 +79,10 @@ def string_to_python(node, env):
 def null_to_python(node, env):
     logger.debug('null_to_python evaluating node %r', node)
     return None
+
+@to_python(CommentOrWhiteSpace)
+def comment_or_whitespace_to_python(node, env):
+    raise RuntimeError("It's a comment")
 
 if __name__ == '__main__':
     fp = sys.argv[1]

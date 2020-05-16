@@ -1,3 +1,5 @@
+import sys
+
 from sly import Parser
 from json5.tokenizer import JSONLexer, tokenize
 from json5.model import *
@@ -7,20 +9,33 @@ class JSONParser(Parser):
     tokens = JSONLexer.tokens
 
 
-    @_('value { WHITESPACE }')
+    # precedence = [
+    #     ('right', BAR),
+    #     ('right', FOO)
+    # ]
+
+
+    @_('value')
     def text(self, p):
         return JSONText(value=p[0])
 
 
-    @_('key { WHITESPACE } COLON { WHITESPACE } value { WHITESPACE }')
+    @_('key COLON value [ COMMA { WHITESPACE } ]')
     def key_value_pair(self, p):
         return KeyValuePair(key=p.key, value=p.value)
 
-    @_('COMMA { WHITESPACE }')
-    def trailing_comma(self, p):
-        return None
 
-    @_('key_value_pair { COMMA [ WHITESPACE ] key_value_pair }')
+    @_('WHITESPACE',
+       'comment')
+    def whitespace_andor_comment(self, p):
+        return p[0]
+
+    @_('[ WHITESPACE ] BLOCK_COMMENT [ WHITESPACE ]',
+       '[ WHITESPACE ] LINE_COMMENT [ WHITESPACE ]')
+    def comment(self, p):
+        return CommentOrWhiteSpace(p[1])
+
+    @_('key_value_pair { key_value_pair }')
     def key_value_pairs(self, p):
         ret = [p[0],]
         for additional_pair_toks in p[1]:
@@ -29,15 +44,15 @@ class JSONParser(Parser):
         return ret
 
 
-    @_('LBRACE { WHITESPACE } [ key_value_pairs ] [ trailing_comma ] RBRACE ')
+    @_('LBRACE [ key_value_pairs ] RBRACE')
     def json_object(self, p):
         return JSONObject(*p.key_value_pairs)
 
-    @_('value { WHITESPACE }')
+    @_('value [ COMMA { WHITESPACE } ]')
     def array_value(self, p):
         return p[0]
 
-    @_('array_value { COMMA [ WHITESPACE ] array_value }')
+    @_('array_value { array_value }')
     def array_values(self, p):
         ret = [p[0], ]
         for other_array_toks in p[1]:
@@ -46,18 +61,21 @@ class JSONParser(Parser):
         return ret
 
 
-    @_('LBRACKET { WHITESPACE } [ array_values ] [ trailing_comma ] RBRACKET')
+    @_('LBRACKET [ array_values ] RBRACKET')
+    @_('LBRACKET [ array_values ] COMMA RBRACKET')
     def json_array(self, p):
         return JSONArray(*p.array_values)
+
+
 
     @_('NAME')
     def identifier(self, p):
         return Identifier(name=p[0])
 
-    @_('identifier',
-       'string')
+    @_('{ whitespace_andor_comment } identifier { whitespace_andor_comment }',
+       '{ whitespace_andor_comment } string { whitespace_andor_comment }')
     def key(self, p):
-        return p[0]
+        return p[1]
 
     @_('INTEGER')
     def number(self, p):
@@ -68,30 +86,18 @@ class JSONParser(Parser):
         return Float(float(p[0]))
 
 
-    @_('number')
+    @_('{ whitespace_andor_comment } number { whitespace_andor_comment }')
     def value(self, p):
-        return p[0]
+        return p[1]
 
-    @_('MINUS number')
+    @_('{ whitespace_andor_comment } MINUS number { whitespace_andor_comment }')
     def value(self, p):
         return UnaryOp(op='-', value=p.number)
 
-    @_('PLUS number')
+    @_('{ whitespace_andor_comment } PLUS number { whitespace_andor_comment }')
     def value(self, p):
         return UnaryOp(op='+', value=p.number)
 
-    # @_('DOUBLE_QUOTE { DOUBLE_QUOTE_STRING_CHAR } DOUBLE_QUOTE')
-    # def string(self, p):
-    #     print(p.DOUBLE_QUOTE_STRING_CHAR)
-    #     return DoubleQuotedString(*p.DOUBLE_QUOTE_STRING_CHAR)
-    #
-    # @_('SINGLE_QUOTE_STRING_CHAR { SINGLE_QUOTE_STRING_CHAR }')
-    # def single_quote_string_content(self, p):
-    #     return p.SINGLE_QUOTE_STRING_CHAR0 + ''.join(p.SINGLE_QUOTE_STRING_CHAR1)
-    #
-    # @_('SINGLE_QUOTE [ single_quote_string_content ] SINGLE_QUOTE')
-    # def string(self, p):
-    #     return SingleQuotedString(*p.single_quote_string_content)
 
     @_('DOUBLE_QUOTE_STRING')
     def double_quoted_string(self, p):
@@ -109,22 +115,24 @@ class JSONParser(Parser):
         return p[0]
 
     @_('TRUE')
-    def value(self, p):
+    def boolean(self, p):
         return BooleanLiteral(True)
 
     @_('FALSE')
-    def value(self, p):
+    def boolean(self, p):
         return BooleanLiteral(False)
 
     @_('NULL')
-    def value(self, p):
+    def null(self, p):
         return NullLiteral()
 
-    @_('string',
-       'json_object',
-       'json_array')
+    @_('{ whitespace_andor_comment } string { whitespace_andor_comment }',
+       '{ whitespace_andor_comment } json_object { whitespace_andor_comment }',
+       '{ whitespace_andor_comment } json_array { whitespace_andor_comment }',
+       '{ whitespace_andor_comment } boolean { whitespace_andor_comment }',
+       '{ whitespace_andor_comment } null { whitespace_andor_comment }')
     def value(self, p):
-        return p[0]
+        return p[1]
 
     @_('BREAK',
     'DO',
@@ -165,3 +173,9 @@ def parse_source(text):
     tokens = tokenize(text)
     model = parse_tokens(tokens)
     return model
+
+if __name__ == '__main__':
+    fp = sys.argv[1]
+    with open(fp) as f:
+        text = f.read()
+    print(repr(parse_source(text)))

@@ -62,3 +62,26 @@ def test_single_quoted_string():
 def test_mixed_usage_quotes():
     json_string = """{"foo": 'bar'}"""
     assert loads(json_string) == {'foo': 'bar'}
+
+def test_trailing_comma_object():
+    json_string = """{"foo": "bar",}"""
+    assert loads(json_string) == {"foo": "bar"}
+
+
+def test_trailing_comma_array():
+    json_string = """["foo", "bar", "baz",]"""
+    assert loads(json_string) == ['foo', 'bar', 'baz']
+
+
+def test_trailing_comma_array_with_trailing_whitespace():
+    json_string = """["foo", "bar", "baz", ]"""
+    assert loads(json_string) == ['foo', 'bar', 'baz']
+
+
+def test_trailing_comma_array_with_leading_whitespace_before_comma():
+    json_string = """["foo", "bar", "baz"  ,]"""
+    assert loads(json_string) == ['foo', 'bar', 'baz']
+
+def test_nested_arrays():
+    json_string = """[["foo"], ["foo","bar"], "baz"]"""
+    assert loads(json_string) == [['foo'], ['foo', 'bar'], 'baz']
