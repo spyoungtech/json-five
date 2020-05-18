@@ -45,3 +45,7 @@ milestones that hopefully will be able to be marked as done as development progr
 - [ ] support manipulation of json model (e.g. to add/edit comments)
 - [ ] dump json model with comments
 - [ ] preserve comments when loading json5 (round-trip support)
+
+...
+
+- [ ] Optimize with a C/Cython version
