@@ -1,2 +1,2 @@
-from .loader import loads
-from .dumper import dumps
+from .loader import loads, load
+from .dumper import dumps, dump

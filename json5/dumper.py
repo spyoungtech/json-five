@@ -22,6 +22,11 @@ class Environment(UserDict):
         self.outfile.write(s)
 
 
+def dump(obj, f, **kwargs):
+    text = dumps(obj, **kwargs)
+    return f.write(text)
+
+
 def dumps(obj, indent=0):
     env = Environment()
     env.indent = indent
