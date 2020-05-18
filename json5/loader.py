@@ -13,6 +13,9 @@ logger.addHandler(logging.StreamHandler(stream=sys.stderr))
 class JsonIdentifier(UserString):
     ...
 
+def load(f):
+    text = f.read()
+    return loads(text)
 
 def loads(s):
     environment = {}
