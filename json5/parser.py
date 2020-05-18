@@ -11,11 +11,6 @@ class JSONParser(Parser):
     tokens = JSONLexer.tokens
 
 
-    # precedence = [
-    #     ('right', BAR),
-    #     ('right', FOO)
-    # ]
-
 
     @_('value')
     def text(self, p):
@@ -87,11 +82,6 @@ class JSONParser(Parser):
     def number(self, p):
         return Float(float(p[0]))
 
-
-    @_('{ whitespace_andor_comment } number { whitespace_andor_comment }')
-    def value(self, p):
-        return p[1]
-
     @_('{ whitespace_andor_comment } MINUS number { whitespace_andor_comment }')
     def value(self, p):
         return UnaryOp(op='-', value=p.number)
@@ -134,7 +124,8 @@ class JSONParser(Parser):
        '{ whitespace_andor_comment } json_object { whitespace_andor_comment }',
        '{ whitespace_andor_comment } json_array { whitespace_andor_comment }',
        '{ whitespace_andor_comment } boolean { whitespace_andor_comment }',
-       '{ whitespace_andor_comment } null { whitespace_andor_comment }')
+       '{ whitespace_andor_comment } null { whitespace_andor_comment }',
+       '{ whitespace_andor_comment } number { whitespace_andor_comment }',)
     def value(self, p):
         return p[1]
 
