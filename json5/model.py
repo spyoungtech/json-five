@@ -51,7 +51,7 @@ class JSONObject(Value):
     def __init__(self, *key_value_pairs, trailing_comma=None):
         key_value_pairs = list(key_value_pairs)
         for kvp in key_value_pairs:
-            assert isinstance(kvp, KeyValuePair)
+            assert isinstance(kvp, KeyValuePair), f"Expected key value pair, got {type(kvp)}"
         super().__init__(key_value_pairs=key_value_pairs, trailing_comma=trailing_comma)
 
 

@@ -36,10 +36,16 @@ class JSONParser(Parser):
         return JSONText(value=p[0])
 
 
-    @_('key COLON value [ COMMA { WHITESPACE } ]')
-    def key_value_pair(self, p):
+    @_('key COLON value')
+    def first_key_value_pair(self, p):
         return KeyValuePair(key=p.key, value=p.value)
 
+    @_('COMMA [ key COLON value ]')
+    def subsequent_key_value_pair(self, p):
+        if p.key and p.value:
+            return KeyValuePair(key=p.key, value=p.value)
+        else:
+            return TrailingComma
 
     @_('WHITESPACE',
        'comment')
@@ -51,21 +57,23 @@ class JSONParser(Parser):
     def comment(self, p):
         return CommentOrWhiteSpace(p[1])
 
-    @_('key_value_pair { key_value_pair }')
+    @_('first_key_value_pair { subsequent_key_value_pair }')
     def key_value_pairs(self, p):
-        ret = [p[0],]
-        for additional_pair_toks in p[1]:
-            pair = additional_pair_toks[-1]
-            ret.append(pair)
-        return ret
+        ret = [p.first_key_value_pair, ]
+        for kvp in p.subsequent_key_value_pair:
+            if kvp is TrailingComma:
+                return ret, TrailingComma
+            ret.append(kvp)
+        return ret, None
+
 
 
     @_('LBRACE [ key_value_pairs ] RBRACE')
     def json_object(self, p):
-        if p.key_value_pairs:
-            return JSONObject(*p.key_value_pairs)
-        else:
+        if not p.key_value_pairs:
             return JSONObject()
+        kvps, trailing_comma = p.key_value_pairs
+        return JSONObject(*kvps, trailing_comma=bool(trailing_comma))
 
     @_('value')
     def first_array_value(self, p):
@@ -90,7 +98,7 @@ class JSONParser(Parser):
         if not p.array_values:
             return JSONArray()
         values, trailing_comma = p.array_values
-        return JSONArray(*values)
+        return JSONArray(*values, trailing_comma=bool(trailing_comma))
 
 
 
@@ -211,6 +219,8 @@ def parse_tokens(raw_tokens):
 def parse_source(text):
     tokens = tokenize(text)
     model = parse_tokens(tokens)
+    if model is None:
+        raise SyntaxError('Was expecting a JSON value, got none. This was probably due to a syntax error while parsing')
     return model
 
 if __name__ == '__main__':
