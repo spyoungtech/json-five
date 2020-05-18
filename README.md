@@ -2,7 +2,15 @@
 
 JSON5 for Python
 
+## Installation
+
+```
+pip install json-five
+```
+
 ## Usage
+
+**NOTE:** the import name is different from the install name (sorry, many were taken already)
 
 ```python
 >>> import json5
