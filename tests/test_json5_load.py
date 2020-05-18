@@ -1,5 +1,6 @@
 import pytest
 from json5.loader import loads
+from sly.lex import LexError
 
 def test_object_string_key_value_pair():
     json_string = """{"foo":"bar"}"""
@@ -86,10 +87,28 @@ def test_nested_arrays():
     json_string = """[["foo"], ["foo","bar"], "baz"]"""
     assert loads(json_string) == [['foo'], ['foo', 'bar'], 'baz']
 
+
 def test_single_quote_with_escape_single_quote():
     json_string = r"""{'fo\'o': 'bar'}"""
     assert loads(json_string) == {"fo\'o": 'bar'}
 
+
 def test_double_quote_with_escape_double_quote():
     json_string = r"""{"fo\"o": "bar"}"""
     assert loads(json_string) == {"fo\"o": 'bar'}
+
+def test_escape_sequence_strings():
+    json_string = r"""'\A\C\/\D\C'"""
+    assert loads(json_string) == 'AC/DC'
+
+def test_line_continuations():
+    json_string = r"""'Hello \
+world!'"""
+    assert loads(json_string) == 'Hello world!'
+
+def test_linebreak_without_continuation_fails():
+    json_string = """'Hello 
+world!"""
+    with pytest.raises(LexError) as exc_info:
+        loads(json_string)
+    assert "Illegal character" in exc_info

@@ -9,7 +9,7 @@ logger.addHandler(logging.StreamHandler(stream=sys.stderr))
 logger.setLevel(level=logging.DEBUG)
 
 class JSONLexer(Lexer):
-    # reflags = re.MULTILINE
+    reflags = re.DOTALL
     tokens = {LBRACE, RBRACE,
               LBRACKET, RBRACKET,
               PLUS, MINUS,
@@ -53,7 +53,7 @@ class JSONLexer(Lexer):
 
     # DOUBLE_QUOTE = r'\"'
     # SINGLE_QUOTE = r"\'"
-    LINE_COMMENT = r"//.*"
+    LINE_COMMENT = r"//[^\n]*"
     _BLOCK_COMMENT_START = r"\/\*"
     _BLOCK_COMMENT_END = r"\*\/"
     BLOCK_COMMENT = r'/\*((.|\n))*?\*/'
