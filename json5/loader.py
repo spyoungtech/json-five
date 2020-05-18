@@ -7,8 +7,8 @@ from collections import UserString
 
 import logging
 logger = logging.getLogger(__name__)
-logger.setLevel(level=logging.DEBUG)
-logger.addHandler(logging.StreamHandler(stream=sys.stderr))
+# logger.setLevel(level=logging.DEBUG)
+# logger.addHandler(logging.StreamHandler(stream=sys.stderr))
 
 class JsonIdentifier(UserString):
     ...
@@ -75,13 +75,18 @@ def unary_to_python(node, env):
 @to_python(String)
 def string_to_python(node, env):
     logger.debug('string_to_python evaluating node %r', node)
-    return ''.join(node.characters)
+    return node.characters
 
 
 @to_python(NullLiteral)
 def null_to_python(node, env):
     logger.debug('null_to_python evaluating node %r', node)
     return None
+
+@to_python(BooleanLiteral)
+def boolean_to_python(node, env):
+    logger.debug('boolean_to_python evaluating node %r', node)
+    return node.value
 
 @to_python(CommentOrWhiteSpace)
 def comment_or_whitespace_to_python(node, env):

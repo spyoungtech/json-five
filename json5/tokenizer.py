@@ -5,24 +5,16 @@ from sly import Lexer
 import logging
 
 logger = logging.getLogger(__name__)
-logger.addHandler(logging.StreamHandler(stream=sys.stderr))
-logger.setLevel(level=logging.DEBUG)
+# logger.addHandler(logging.StreamHandler(stream=sys.stderr))
+# logger.setLevel(level=logging.DEBUG)
 
 class JSONLexer(Lexer):
     reflags = re.DOTALL
     tokens = {LBRACE, RBRACE,
               LBRACKET, RBRACKET,
-              PLUS, MINUS,
-              FLOAT, INTEGER,
-              #DOUBLE_QUOTE, SINGLE_QUOTE,
-              #DOUBLE_QUOTE_STRING_CHAR, SINGLE_QUOTE_STRING_CHAR,
               DOUBLE_QUOTE_STRING, SINGLE_QUOTE_STRING,
-              # DECIMAL,
               NAME,
               COMMA,
-              # DOLLAR,
-              # UNDERSCORE,
-              #LINE_COMMENT_START, BLOCK_COMMENT_START, BLOCK_COMMENT_END,
               BLOCK_COMMENT,
               LINE_COMMENT,
               WHITESPACE,
@@ -33,6 +25,8 @@ class JSONLexer(Lexer):
               BREAK, DO, INSTANCEOF, TYPEOF, CASE, ELSE, NEW, VAR, CATCH, FINALLY, RETURN, VOID, CONTINUE, FOR, SWITCH, WHILE, DEBUGGER, FUNCTION, THIS, WITH, DEFAULT, IF, THROW, DELETE, IN, TRY,
 
               # Numbers
+              PLUS, MINUS,
+              FLOAT, INTEGER,
               INFINITY, NAN, EXPONENT,
               HEXADECIMAL
               }
@@ -108,6 +102,7 @@ class JSONLexer(Lexer):
 def tokenize(text):
     lexer = JSONLexer()
     tokens = lexer.tokenize(text)
+    return tokens
     for tok in tokens:
         logger.debug(tok)
     return lexer.tokenize(text)

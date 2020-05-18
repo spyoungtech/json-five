@@ -24,6 +24,7 @@ class Node(SimpleNamespace):
             )
             + ")"
         )
+        return rep
         try:
             return black_format_code(rep)
         except ImportError as e:
@@ -113,18 +114,16 @@ class String(Value, Key):
     ...
 
 class DoubleQuotedString(String):
-    def __init__(self, *characters):
-        characters = list(characters)
-        for char in characters:
-            assert isinstance(char, str)
+    def __init__(self, characters):
+        characters = characters
+        assert isinstance(characters, str)
         super().__init__(characters=characters)
 
 
 class SingleQuotedString(String):
-    def __init__(self, *characters):
-        characters = list(characters)
-        for char in characters:
-            assert isinstance(char, str)
+    def __init__(self, characters):
+        characters = characters
+        assert isinstance(characters, str)
         super().__init__(characters=characters)
 
 
