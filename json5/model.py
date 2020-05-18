@@ -88,9 +88,9 @@ class Number(Value):
 
 
 class Integer(Number):
-    def __init__(self, value):
+    def __init__(self, value, is_hex=False):
         assert isinstance(value, int)
-        super().__init__(value=value)
+        super().__init__(value=value, is_hex=is_hex)
 
 
 class Float(Number):

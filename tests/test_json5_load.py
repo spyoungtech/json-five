@@ -181,3 +181,11 @@ def test_single_item_array_with_trailing_comma():
     json_string = """["foo" , ]"""
     assert loads(json_string) == ['foo']
 
+
+def test_hexadecimal_load():
+    json_string = """
+    {
+    positiveHex: 0xdecaf,
+    negativeHex: -0xC0FFEE,}"""
+    assert loads(json_string) == {'positiveHex': 0xdecaf,
+                                  'negativeHex': -0xC0FFEE}

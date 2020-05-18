@@ -141,6 +141,10 @@ class JSONParser(Parser):
         exp_notation = p[1][0]  # e or E
         return Float(float(p[0]+p[1]), exp_notation=exp_notation)
 
+    @_('HEXADECIMAL')
+    def number(self, p):
+        return Integer(int(p[0], 0), is_hex=True)
+
     @_('DOUBLE_QUOTE_STRING')
     def double_quoted_string(self, p):
         contents = p[0][1:-1]

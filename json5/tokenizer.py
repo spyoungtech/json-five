@@ -33,7 +33,8 @@ class JSONLexer(Lexer):
               BREAK, DO, INSTANCEOF, TYPEOF, CASE, ELSE, NEW, VAR, CATCH, FINALLY, RETURN, VOID, CONTINUE, FOR, SWITCH, WHILE, DEBUGGER, FUNCTION, THIS, WITH, DEFAULT, IF, THROW, DELETE, IN, TRY,
 
               # Numbers
-              INFINITY, NAN, EXPONENT
+              INFINITY, NAN, EXPONENT,
+              HEXADECIMAL
               }
 
     LBRACE = r'{'
@@ -62,6 +63,7 @@ class JSONLexer(Lexer):
     MINUS = r'\-'
     PLUS = r'\+'
     EXPONENT = r"(e|E)(\-|\+)?\d+"
+    HEXADECIMAL = r'0x[0-9a-fA-F]+'
     FLOAT = r'(\d+\.\d*)|(\d*\.\d+)'      # 23.45
     INTEGER = r'\d+'
     NAME = r'[a-zA-Z_\$]([a-zA-Z_\d\$])*'
