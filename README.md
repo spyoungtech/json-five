@@ -57,3 +57,13 @@ milestones that hopefully will be able to be marked as done as development progr
 ...
 
 - [ ] Optimize with a C/Cython version
+
+## How fast is it?
+
+It's nowhere close to the C-optimized `json` stdlib module. We may get closer to that 
+benchmark if/when we rewrite parts with Cython.
+
+In my own limited testing, as of v0.0.2, this module is about 10-450x slower than the stdlib C-optimized `json` 
+and about 10-50x slower than the stdlib pure python version of `json`.
+
+I expect this to slow down marginally when round-trip comment preservation is implemented.
