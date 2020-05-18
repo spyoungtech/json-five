@@ -114,3 +114,12 @@ world!"""
     with pytest.raises(LexError) as exc_info:
         loads(json_string)
     assert "Illegal character" in str(exc_info)
+
+def test_number_literals_inf_nan():
+    json_string = """{
+    "positiveInfinity": Infinity,
+    "negativeInfinity": -Infinity,
+    "notANumber": NaN,}"""
+    assert loads(json_string) == {'positiveInfinity': math.inf,
+                                  'negativeInfinity': -math.inf,
+                                  'notANumber': math.nan}

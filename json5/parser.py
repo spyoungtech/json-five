@@ -82,6 +82,14 @@ class JSONParser(Parser):
     def number(self, p):
         return Float(float(p[0]))
 
+    @_('INFINITY')
+    def number(self, p):
+        return Infinity()
+
+    @_('NAN')
+    def number(self, p):
+        return NaN()
+
     @_('{ whitespace_andor_comment } MINUS number { whitespace_andor_comment }')
     def value(self, p):
         return UnaryOp(op='-', value=p.number)

@@ -31,6 +31,9 @@ class JSONLexer(Lexer):
 
               # RESERVED KEYWORDS
               BREAK, DO, INSTANCEOF, TYPEOF, CASE, ELSE, NEW, VAR, CATCH, FINALLY, RETURN, VOID, CONTINUE, FOR, SWITCH, WHILE, DEBUGGER, FUNCTION, THIS, WITH, DEFAULT, IF, THROW, DELETE, IN, TRY,
+
+              # Number literals
+              INFINITY, NAN
               }
 
 
@@ -58,8 +61,7 @@ class JSONLexer(Lexer):
     _BLOCK_COMMENT_END = r"\*\/"
     BLOCK_COMMENT = r'/\*((.|\n))*?\*/'
     WHITESPACE = "[\u0009\u000A\u000B\u000C\u000D\u0020\u00A0\u2028\u2029\ufeff]+"
-    print(repr(BLOCK_COMMENT))
-
+    MINUS = r'-'
     # DOUBLE_QUOTE_STRING_CHAR = r'[^\"]'  # needs work for escapes
     # SINGLE_QUOTE_STRING_CHAR = r"[^\']"  # needs work for escapes
     # UNDERSCORE = r"_"
@@ -70,6 +72,8 @@ class JSONLexer(Lexer):
     NAME['true'] = TRUE
     NAME['false'] = FALSE
     NAME['null'] = NULL
+    NAME['Infinity'] = INFINITY
+    NAME['NaN'] = NAN
 
     # RESERVED KEYWORDS
     NAME['break'] = BREAK

@@ -1,3 +1,4 @@
+import math
 from types import SimpleNamespace
 from functools import lru_cache
 from decimal import Decimal
@@ -97,8 +98,14 @@ class Float(Number):
         assert isinstance(value, float)
         super().__init__(value=value)
 
+class Infinity(Number):
+    def __init__(self):
+        super().__init__(value=math.inf)
 
 
+class NaN(Number):
+    def __init__(self):
+        super().__init__(value=math.nan)
 
 class String(Value, Key):
     ...
