@@ -72,7 +72,7 @@ def test_trailing_comma_object():
 
 
 def test_trailing_comma_array():
-    json_string = """["foo", "bar", "baz",]"""
+    json_string = """["foo","bar", "baz",]"""
     assert loads(json_string) == ['foo', 'bar', 'baz']
 
 
@@ -153,3 +153,17 @@ def test_escape_sequences():
         "bar": "foo\\bar\\baz",
         "baz": "foo\tbar\tbaz"
     }
+
+
+def test_empty_object():
+    json_string = '{}'
+    assert loads(json_string) == {}
+
+def test_empty_array():
+    json_string = '[]'
+    assert loads(json_string) == []
+
+@pytest.mark.parametrize('json_string', ['{"foo": "bar", "bar" "baz"', '["foo" "bar"]', '[,]', '{,}', '!', '{"foo": "bar" "bacon": "eggs"}'])
+def test_invalid_json(json_string):
+    with pytest.raises(Exception):
+        loads(json_string)

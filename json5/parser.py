@@ -19,6 +19,8 @@ ESCAPE_SEQUENCES = {
     "'": '\u0027',
 }
 
+class TrailingComma:
+    pass
 
 def replace_escape_literals(matchobj):
     seq = matchobj.group(1)
@@ -60,25 +62,35 @@ class JSONParser(Parser):
 
     @_('LBRACE [ key_value_pairs ] RBRACE')
     def json_object(self, p):
-        return JSONObject(*p.key_value_pairs)
+        if p.key_value_pairs:
+            return JSONObject(*p.key_value_pairs)
+        else:
+            return JSONObject()
 
-    @_('value [ COMMA { WHITESPACE } ]')
-    def array_value(self, p):
+    @_('value')
+    def first_array_value(self, p):
         return p[0]
 
-    @_('array_value { array_value }')
+    @_('COMMA { whitespace_andor_comment } [ value ]')
+    def subsequent_array_value(self, p):
+        return p.value or TrailingComma
+
+    @_('first_array_value { subsequent_array_value }')
     def array_values(self, p):
-        ret = [p[0], ]
-        for other_array_toks in p[1]:
-            array_value = other_array_toks[-1]
-            ret.append(array_value)
-        return ret
+        ret = [p.first_array_value, ]
+        for value in p.subsequent_array_value:
+            if value is TrailingComma:
+                return ret, TrailingComma
+            ret.append(value)
+        return ret, None
 
 
     @_('LBRACKET [ array_values ] RBRACKET')
-    @_('LBRACKET [ array_values ] COMMA RBRACKET')
     def json_array(self, p):
-        return JSONArray(*p.array_values)
+        if not p.array_values:
+            return JSONArray()
+        values, trailing_comma = p.array_values
+        return JSONArray(*values)
 
 
 

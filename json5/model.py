@@ -48,19 +48,19 @@ class Key(Node):
 
 
 class JSONObject(Value):
-    def __init__(self, *key_value_pairs):
+    def __init__(self, *key_value_pairs, trailing_comma=None):
         key_value_pairs = list(key_value_pairs)
         for kvp in key_value_pairs:
             assert isinstance(kvp, KeyValuePair)
-        super().__init__(key_value_pairs=key_value_pairs)
+        super().__init__(key_value_pairs=key_value_pairs, trailing_comma=trailing_comma)
 
 
 class JSONArray(Value):
-    def __init__(self, *values):
+    def __init__(self, *values, trailing_comma=None):
         values = list(values)
         for value in values:
-            assert isinstance(value, Value)
-        super().__init__(values=values)
+            assert isinstance(value, Value), f"Was expecting object with type Value. Got {type(value)}"
+        super().__init__(values=values, trailing_comma=trailing_comma)
 
 
 class KeyValuePair(Node):
