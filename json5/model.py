@@ -94,9 +94,11 @@ class Integer(Number):
 
 
 class Float(Number):
-    def __init__(self, value):
+    def __init__(self, value, exp_notation=None):
         assert isinstance(value, float)
-        super().__init__(value=value)
+        assert exp_notation is None or exp_notation in ('e', 'E')
+        super().__init__(value=value, exp_notation=exp_notation)
+
 
 class Infinity(Number):
     def __init__(self):

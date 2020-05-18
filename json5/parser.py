@@ -11,7 +11,6 @@ class JSONParser(Parser):
     tokens = JSONLexer.tokens
 
 
-
     @_('value')
     def text(self, p):
         return JSONText(value=p[0])
@@ -98,6 +97,11 @@ class JSONParser(Parser):
     def value(self, p):
         return UnaryOp(op='+', value=p.number)
 
+    @_('INTEGER EXPONENT',
+       'FLOAT EXPONENT')
+    def number(self, p):
+        exp_notation = p[1][0]  # e or E
+        return Float(float(p[0]+p[1]), exp_notation=exp_notation)
 
     @_('DOUBLE_QUOTE_STRING')
     def double_quoted_string(self, p):

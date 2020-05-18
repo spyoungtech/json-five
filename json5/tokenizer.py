@@ -32,39 +32,36 @@ class JSONLexer(Lexer):
               # RESERVED KEYWORDS
               BREAK, DO, INSTANCEOF, TYPEOF, CASE, ELSE, NEW, VAR, CATCH, FINALLY, RETURN, VOID, CONTINUE, FOR, SWITCH, WHILE, DEBUGGER, FUNCTION, THIS, WITH, DEFAULT, IF, THROW, DELETE, IN, TRY,
 
-              # Number literals
-              INFINITY, NAN
+              # Numbers
+              INFINITY, NAN, EXPONENT
               }
-
-
-
-    #ignore_line_comment_eof = r'//.*$'
-
-
-
 
     LBRACE = r'{'
     RBRACE = r'}'
     LBRACKET = r'\['
     RBRACKET = r'\]'
-    # DOLLAR = r'\$'
     COLON = r"\:"
     COMMA = r"\,"
 
     DOUBLE_QUOTE_STRING = r'"(?:[^"\\]|\\.)*"'
     SINGLE_QUOTE_STRING = r"'(?:[^'\\]|\\.)*'"
 
-    # DOUBLE_QUOTE = r'\"'
-    # SINGLE_QUOTE = r"\'"
     LINE_COMMENT = r"//[^\n]*"
     _BLOCK_COMMENT_START = r"\/\*"
     _BLOCK_COMMENT_END = r"\*\/"
-    BLOCK_COMMENT = r'/\*((.|\n))*?\*/'
-    WHITESPACE = "[\u0009\u000A\u000B\u000C\u000D\u0020\u00A0\u2028\u2029\ufeff]+"
-    MINUS = r'-'
-    # DOUBLE_QUOTE_STRING_CHAR = r'[^\"]'  # needs work for escapes
-    # SINGLE_QUOTE_STRING_CHAR = r"[^\']"  # needs work for escapes
-    # UNDERSCORE = r"_"
+    @_(r'/\*((.|\n))*?\*/')
+    def BLOCK_COMMENT(self, tok):
+        self.lineno += tok.value.count('\n')
+        return tok
+
+    @_("[\u0009\u000A\u000B\u000C\u000D\u0020\u00A0\u2028\u2029\ufeff]+")
+    def WHITESPACE(self, tok):
+        self.lineno += tok.value.count('\n')
+        return tok
+
+    MINUS = r'\-'
+    PLUS = r'\+'
+    EXPONENT = r"(e|E)(\-|\+)?\d+"
     FLOAT = r'(\d+\.\d*)|(\d*\.\d+)'      # 23.45
     INTEGER = r'\d+'
     NAME = r'[a-zA-Z_\$]([a-zA-Z_\d\$])*'
