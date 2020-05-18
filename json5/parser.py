@@ -6,6 +6,24 @@ from sly import Parser
 from json5.tokenizer import JSONLexer, tokenize
 from json5.model import *
 
+ESCAPE_SEQUENCES = {
+    'b': '\u0008',
+    'f': '\u000C',
+    'n': '\u000A',
+    'r': '\u000D',
+    't': '\u0009',
+    'v': '\u000B',
+    '0': '\u0000',
+    '\\': '\u005c',
+    '"': '\u0022',
+    "'": '\u0027',
+}
+
+
+def replace_escape_literals(matchobj):
+    seq = matchobj.group(1)
+    return ESCAPE_SEQUENCES.get(seq, seq)
+
 class JSONParser(Parser):
     debugfile = 'parser.out'
     tokens = JSONLexer.tokens
@@ -107,14 +125,14 @@ class JSONParser(Parser):
     def double_quoted_string(self, p):
         contents = p[0][1:-1]
         contents = re.sub('\\\n', '', contents)
-        contents = re.sub(r'\\(.)', r'\1', contents)
+        contents = re.sub(r'\\(.)', replace_escape_literals, contents)
         return DoubleQuotedString(*contents)
 
     @_("SINGLE_QUOTE_STRING")
     def single_quoted_string(self, p):
         contents = p[0][1:-1]
         contents = re.sub('\\\n', '', contents)
-        contents = re.sub(r'\\(.)', r'\1', contents)
+        contents = re.sub(r'\\(.)', replace_escape_literals, contents)
         return SingleQuotedString(*contents)
 
     @_('double_quoted_string',

@@ -136,3 +136,15 @@ def test_number_literals():
     "withFractionPart": 123.456,
     "onlyFractionPart": .456,
     "withExponent": 123e-2}
+
+
+def test_escape_sequences():
+    json_string = r"""{
+    "foo": "foo\nbar\nbaz",
+    "bar": "foo\\bar\\baz",
+    "baz": "foo\tbar\tbaz"}"""
+    assert loads(json_string) == {
+        "foo": "foo\nbar\nbaz",
+        "bar": "foo\\bar\\baz",
+        "baz": "foo\tbar\tbaz"
+    }
