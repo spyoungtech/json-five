@@ -124,14 +124,14 @@ class JSONParser(Parser):
     @_('DOUBLE_QUOTE_STRING')
     def double_quoted_string(self, p):
         contents = p[0][1:-1]
-        contents = re.sub('\\\n', '', contents)
+        contents = re.sub(r'\\(\r\n|[\u000A\u000D\u2028\u2029])', '', contents)
         contents = re.sub(r'\\(.)', replace_escape_literals, contents)
         return DoubleQuotedString(*contents)
 
     @_("SINGLE_QUOTE_STRING")
     def single_quoted_string(self, p):
         contents = p[0][1:-1]
-        contents = re.sub('\\\n', '', contents)
+        contents = re.sub(r'\\(\r\n|[\u000A\u000D\u2028\u2029])', '', contents)
         contents = re.sub(r'\\(.)', replace_escape_literals, contents)
         return SingleQuotedString(*contents)
 

@@ -108,6 +108,11 @@ def test_line_continuations():
 world!'"""
     assert loads(json_string) == 'Hello world!'
 
+@pytest.mark.parametrize("terminator", ["\r\n", '\n', '\u2028', '\u2029'])
+def test_line_continuations_alternate_terminators(terminator):
+    json_string = f"""'Hello \\{terminator}world!'"""
+    assert loads(json_string) == 'Hello world!'
+
 def test_linebreak_without_continuation_fails():
     json_string = """'Hello 
 world!"""
