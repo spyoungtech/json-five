@@ -1,3 +1,5 @@
+import math
+
 import pytest
 from json5.loader import loads
 from sly.lex import LexError
@@ -111,4 +113,4 @@ def test_linebreak_without_continuation_fails():
 world!"""
     with pytest.raises(LexError) as exc_info:
         loads(json_string)
-    assert "Illegal character" in exc_info
+    assert "Illegal character" in str(exc_info)
