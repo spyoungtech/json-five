@@ -48,8 +48,8 @@ class JSONLexer(Lexer):
     COLON = r"\:"
     COMMA = r"\,"
 
-    DOUBLE_QUOTE_STRING = r'\"[^\"]+\"'
-    SINGLE_QUOTE_STRING = r"\'[^\']+\'"
+    DOUBLE_QUOTE_STRING = r'"(?:[^"\\]|\\.)*"'
+    SINGLE_QUOTE_STRING = r"'(?:[^'\\]|\\.)*'"
 
     # DOUBLE_QUOTE = r'\"'
     # SINGLE_QUOTE = r"\'"

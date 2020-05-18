@@ -1,3 +1,5 @@
+import re
+
 import sys
 
 from sly import Parser
@@ -102,12 +104,14 @@ class JSONParser(Parser):
     @_('DOUBLE_QUOTE_STRING')
     def double_quoted_string(self, p):
         contents = p[0][1:-1]
-        return DoubleQuotedString(*contents)
+        new_contents = re.sub(r'\\(.)', r'\1', contents)
+        return DoubleQuotedString(*new_contents)
 
     @_("SINGLE_QUOTE_STRING")
     def single_quoted_string(self, p):
         contents = p[0][1:-1]
-        return SingleQuotedString(*contents)
+        new_contents = re.sub(r'\\(.)', r'\1', contents)
+        return SingleQuotedString(*new_contents)
 
     @_('double_quoted_string',
        'single_quoted_string')

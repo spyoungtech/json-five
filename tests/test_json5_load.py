@@ -85,3 +85,11 @@ def test_trailing_comma_array_with_leading_whitespace_before_comma():
 def test_nested_arrays():
     json_string = """[["foo"], ["foo","bar"], "baz"]"""
     assert loads(json_string) == [['foo'], ['foo', 'bar'], 'baz']
+
+def test_single_quote_with_escape_single_quote():
+    json_string = r"""{'fo\'o': 'bar'}"""
+    assert loads(json_string) == {"fo\'o": 'bar'}
+
+def test_double_quote_with_escape_double_quote():
+    json_string = r"""{"fo\"o": "bar"}"""
+    assert loads(json_string) == {"fo\"o": 'bar'}
