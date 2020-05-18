@@ -123,3 +123,16 @@ def test_number_literals_inf_nan():
     assert loads(json_string) == {'positiveInfinity': math.inf,
                                   'negativeInfinity': -math.inf,
                                   'notANumber': math.nan}
+
+
+def test_number_literals():
+    json_string = """{
+    "integer": 123,
+    "withFractionPart": 123.456,
+    "onlyFractionPart": .456,
+    "withExponent": 123e-2}"""
+    assert loads(json_string) == {
+    "integer": 123,
+    "withFractionPart": 123.456,
+    "onlyFractionPart": .456,
+    "withExponent": 123e-2}
