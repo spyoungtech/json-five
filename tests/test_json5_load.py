@@ -136,7 +136,7 @@ def test_linebreak_without_continuation_fails():
 world!"""
     with pytest.raises(LexError) as exc_info:
         loads(json_string)
-    assert "Illegal character" in str(exc_info)
+    assert "Illegal character" in str(exc_info.value)
 
 
 def test_number_literals_inf_nan():
