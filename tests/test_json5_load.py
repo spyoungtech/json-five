@@ -167,3 +167,17 @@ def test_empty_array():
 def test_invalid_json(json_string):
     with pytest.raises(Exception):
         loads(json_string)
+
+
+def test_object_with_identifier_key():
+    json_string = """{unquoted: "foo"}"""
+    assert loads(json_string) == {'unquoted': "foo"}
+
+def test_single_item_array():
+    json_string = """["foo"]"""
+    assert loads(json_string) == ['foo']
+
+def test_single_item_array_with_trailing_comma():
+    json_string = """["foo" , ]"""
+    assert loads(json_string) == ['foo']
+
