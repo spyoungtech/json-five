@@ -131,9 +131,15 @@ class DefaultLoader:
         logger.debug('boolean_to_python evaluating node %r', node)
         return node.value
 
-    @to_python(CommentOrWhiteSpace)
+    @to_python(Comment)
     def comment_or_whitespace_to_python(self, node, env):
-        raise RuntimeError("It's a comment")
+        raise RuntimeError("Comments are not supported in the default loader!")
+
+
+class ModelLoader(DefaultLoader):
+    def load(self, node, env):
+        return node
+
 
 
 if __name__ == '__main__':

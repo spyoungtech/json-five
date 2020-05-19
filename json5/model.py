@@ -6,6 +6,12 @@ from decimal import Decimal
 
 
 class Node(SimpleNamespace):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Whitespace/Comments before/after the node
+        self.wsc_before = []
+        self.wsc_after = []
+
     def __repr__(self):
         rep = (
             f"{self.__class__.__name__}("
@@ -138,8 +144,22 @@ class UnaryOp(Value):
         assert isinstance(value, Number)
         super().__init__(op=op, value=value)
 
+class TrailingComma(Node):
+    ...
 
-class CommentOrWhiteSpace(Node):
+
+class Comment(Node):
     def __init__(self, value):
         assert isinstance(value, str), f"Expected str got {type(value)}"
         super().__init__(value=value)
+
+
+class LineComment(Comment):
+    ...
+
+class BlockComment(Comment):
+    ...
+
+
+class WhiteSpace(Node):
+    ...
