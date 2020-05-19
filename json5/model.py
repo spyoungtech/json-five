@@ -3,16 +3,7 @@ from types import SimpleNamespace
 from functools import lru_cache
 from decimal import Decimal
 
-@lru_cache(maxsize=1024)
-def black_format_code(source):
-    import black
-    kwargs = {
-        'line_length': 120,
-    }
-    reformatted_source = black.format_file_contents(
-        source, fast=True, mode=black.FileMode(**kwargs)
-    )
-    return reformatted_source
+
 
 class Node(SimpleNamespace):
     def __repr__(self):
@@ -25,14 +16,6 @@ class Node(SimpleNamespace):
             + ")"
         )
         return rep
-        try:
-            return black_format_code(rep)
-        except ImportError as e:
-            # Just in case you don't have `black` installed :-)
-            return rep
-        except Exception as e:
-            print('WARN: Unexpected error formatting code ', e)
-            return rep
 
 
 class JSONText(Node):
@@ -89,26 +72,37 @@ class Number(Value):
 
 
 class Integer(Number):
-    def __init__(self, value, is_hex=False):
-        assert isinstance(value, int)
-        super().__init__(value=value, is_hex=is_hex)
+    def __init__(self, raw_value, is_hex=False):
+        value = int(raw_value) if not is_hex else int(raw_value, 0)
+        super().__init__(raw_value=raw_value, value=value, is_hex=is_hex)
 
 
 class Float(Number):
-    def __init__(self, value, exp_notation=None):
-        assert isinstance(value, float)
+    def __init__(self, raw_value, exp_notation=None):
+        value = float(raw_value)
         assert exp_notation is None or exp_notation in ('e', 'E')
-        super().__init__(value=value, exp_notation=exp_notation)
+        super().__init__(raw_value=raw_value, value=value, exp_notation=exp_notation)
 
 
 class Infinity(Number):
-    def __init__(self):
-        super().__init__(value=math.inf)
+    def __init__(self, negative=False):
+        super().__init__(negative=negative)
 
+    @property
+    def value(self):
+        return math.inf if not self.negative else -math.inf
+
+    @property
+    def const(self):
+        return '-Infinity' if self.negative else 'Infinity'
 
 class NaN(Number):
     def __init__(self):
         super().__init__(value=math.nan)
+
+    @property
+    def const(self):
+        return 'NaN'
 
 class String(Value, Key):
     ...

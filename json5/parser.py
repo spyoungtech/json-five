@@ -113,11 +113,11 @@ class JSONParser(Parser):
 
     @_('INTEGER')
     def number(self, p):
-        return Integer(int(p[0]))
+        return Integer(p[0])
 
     @_('FLOAT')
     def number(self, p):
-        return Float(float(p[0]))
+        return Float(p[0])
 
     @_('INFINITY')
     def number(self, p):
@@ -129,6 +129,8 @@ class JSONParser(Parser):
 
     @_('{ whitespace_andor_comment } MINUS number { whitespace_andor_comment }')
     def value(self, p):
+        if isinstance(p.number, Infinity):
+            p.number.negative = True
         return UnaryOp(op='-', value=p.number)
 
     @_('{ whitespace_andor_comment } PLUS number { whitespace_andor_comment }')
@@ -139,11 +141,11 @@ class JSONParser(Parser):
        'FLOAT EXPONENT')
     def number(self, p):
         exp_notation = p[1][0]  # e or E
-        return Float(float(p[0]+p[1]), exp_notation=exp_notation)
+        return Float(p[0]+p[1], exp_notation=exp_notation)
 
     @_('HEXADECIMAL')
     def number(self, p):
-        return Integer(int(p[0], 0), is_hex=True)
+        return Integer(p[0], is_hex=True)
 
     @_('DOUBLE_QUOTE_STRING')
     def double_quoted_string(self, p):

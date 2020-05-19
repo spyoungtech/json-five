@@ -1,3 +1,5 @@
+import types
+
 import sys
 
 from json5.parser import parse_source
@@ -10,15 +12,30 @@ logger = logging.getLogger(__name__)
 # logger.setLevel(level=logging.DEBUG)
 # logger.addHandler(logging.StreamHandler(stream=sys.stderr))
 
+class Environment(types.SimpleNamespace):
+    def __init__(self, object_hook=None, parse_float=None, parse_int=None, parse_constant=None, strict=True, object_pairs_hook=None):
+        super().__init__(object_hook=object_hook, parse_float=parse_float, parse_int=parse_int, parse_constant=parse_constant, strict=strict, object_pairs_hook=object_pairs_hook)
+
+
 class JsonIdentifier(UserString):
     ...
 
-def load(f):
+def load(f, **kwargs):
     text = f.read()
     return loads(text)
 
-def loads(s):
-    environment = {}
+def loads(s, *args, **kwargs):
+    """
+    :param s:
+    :param object_hook: same meaning as in ``json.loads``
+    :param parse_float: same meaning as in ``json.loads``
+    :param parse_int: same meaning as in ``json.loads``
+    :param parse_constant: same meaning as in ``json.loads``
+    :param strict: same meaning as in ``json.loads`` (currently has no effect)
+    :param object_pairs_hook: same meaning as in ``json.loads``
+    :return:
+    """
+    environment = Environment(**kwargs)
     model = parse_source(s)
     # logger.debug('Model is %r', model)
     return _load(model, environment)
@@ -43,7 +60,12 @@ def json_object_to_python(node, env):
         key = _load(key_value_pair.key, env)
         value = _load(key_value_pair.value, env)
         d[key] = value
-    return d
+    if env.object_pairs_hook:
+        return env.object_pairs_hook(list(d.items()))
+    elif env.object_hook:
+        return env.object_hook(d)
+    else:
+        return d
 
 
 @to_python(JSONArray)
@@ -57,15 +79,32 @@ def identifier_to_python(node, env):
     return JsonIdentifier(node.name)
 
 
-@to_python(Number)
+@to_python(Number)  # NaN/Infinity are covered here
 def number_to_python(node, env):
     logger.debug('number_to_python evaluating node %r', node)
+    if env.parse_constant:
+        return env.parse_constant(node.const)
     return node.value
 
+@to_python(Integer)
+def integer_to_python(node, env):
+    if env.parse_int:
+        return env.parse_int(node.raw_value)
+    else:
+        return node.value
+
+@to_python(Float)
+def float_to_python(node, env):
+    if env.parse_float:
+        return env.parse_float(node.raw_value)
+    else:
+        return node.value
 
 @to_python(UnaryOp)
 def unary_to_python(node, env):
     logger.debug('unary_to_python evaluating node %r', node)
+    if isinstance(node.value, Infinity):
+        return _load(node.value, env)
     value = _load(node.value, env)
     if node.op == '-':
         return value * -1
