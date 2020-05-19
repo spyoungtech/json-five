@@ -224,26 +224,10 @@ class ModelDumper:
         self.dump(node.value)
         self.process_wsc_after(node)
 
-    # @to_json(String)
-    # def string_to_json(self, node):
-    #     self.process_wsc_before(node)
-    #
-    #     self.process_wsc_after(node)
-
-    @to_json(SingleQuotedString)
-    def single_quoted_string_to_json(self, node):
+    @to_json(String)
+    def string_to_json(self, node):
         self.process_wsc_before(node)
-        self.env.write("'")
-        self.env.write(node.characters)  # Need to properly escape this
-        self.env.write("'")
-        self.process_wsc_after(node)
-
-    @to_json(DoubleQuotedString)
-    def double_quoted_string_to_json(self, node):
-        self.process_wsc_before(node)
-        self.env.write('"')
-        self.env.write(node.characters)  # Need to escape; what about line continuations?
-        self.env.write('"')
+        self.env.write(node.raw_value)  # The original value, including any escape sequences or line continuations
         self.process_wsc_after(node)
 
     @to_json(NullLiteral)
@@ -277,4 +261,16 @@ class ModelDumper:
     def trailing_comma_to_json(self, node):
         self.process_wsc_before(node)
         self.env.write(',')
+        self.process_wsc_after(node)
+
+    @to_json(Infinity)
+    def infinity_to_json(self, node):
+        self.process_wsc_before(node)
+        self.env.write('Infinity')
+        self.process_wsc_after(node)
+
+    @to_json(NaN)
+    def nan_to_json(self, node):
+        self.process_wsc_before(node)
+        self.env.write('NaN')
         self.process_wsc_after(node)

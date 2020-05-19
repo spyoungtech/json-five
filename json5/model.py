@@ -114,17 +114,19 @@ class String(Value, Key):
     ...
 
 class DoubleQuotedString(String):
-    def __init__(self, characters):
+    def __init__(self, characters, raw_value):
+        assert isinstance(raw_value, str)
         characters = characters
         assert isinstance(characters, str)
-        super().__init__(characters=characters)
+        super().__init__(characters=characters, raw_value=raw_value)
 
 
 class SingleQuotedString(String):
-    def __init__(self, characters):
+    def __init__(self, characters, raw_value):
+        assert isinstance(raw_value, str)
         characters = characters
         assert isinstance(characters, str)
-        super().__init__(characters=characters)
+        super().__init__(characters=characters, raw_value=raw_value)
 
 
 class BooleanLiteral(Value):
