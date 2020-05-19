@@ -2,6 +2,11 @@
 
 JSON5 for Python
 
+[![Build Status](https://travis-ci.com/spyoungtech/json-five.svg?branch=master)](https://travis-ci.com/spyoungtech/json-five) 
+[![version](https://img.shields.io/pypi/v/json-five.svg?colorB=blue)](https://pypi.org/project/json-five/) 
+[![pyversion](https://img.shields.io/pypi/pyversions/json-five.svg?)](https://pypi.org/project/json-five/) 
+[![Coverage](https://coveralls.io/repos/github/spyoungtech/json-five/badge.svg?branch=master)](https://coveralls.io/github/spyoungtech/json-five?branch=master)
+
 ## Installation
 
 ```
