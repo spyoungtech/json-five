@@ -4,21 +4,9 @@ import sys
 
 from json5.parser import parse_source
 from json5.model import *
-from functools import singledispatch, update_wrapper
+from json5.utils import singledispatchmethod
 from collections import UserString
 
-try:
-    from functools import singledispatchmethod
-except ImportError:
-    def singledispatchmethod(func):
-        dispatcher = singledispatch(func)
-
-        def wrapper(*args, **kwargs):
-            return dispatcher.dispatch(args[1].__class__)(*args, **kwargs)
-
-        wrapper.register = dispatcher.register
-        update_wrapper(wrapper, func)
-        return wrapper
 
 import logging
 logger = logging.getLogger(__name__)

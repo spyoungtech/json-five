@@ -1,5 +1,5 @@
 import sys
-from functools import singledispatch
+from .utils import singledispatchmethod
 from json5.model import *
 from json5.loader import JsonIdentifier
 from collections import UserDict
@@ -27,101 +27,104 @@ def dump(obj, f, **kwargs):
     return f.write(text)
 
 
-def dumps(obj, indent=0):
+def dumps(obj, dumper=None, indent=0):
     env = Environment()
     env.indent = indent
-    model = _dump(obj, env)
+    if dumper is None:
+        dumper = DefaultDumper()
+    model = dumper.dump(obj, env)
     env.outfile.seek(0)
     return env.outfile.read()
 
+class DefaultDumper:
 
-@singledispatch
-def _dump(obj, env):
-    raise NotImplementedError(f"Cannot dump node {repr(obj)}")
-
-to_json = _dump.register
-
-@to_json(dict)
-def dict_to_json(d, env):
-    env.write('{', indent=0)
-    if env.indent:
-        env.write('\n')
-        env.indent_level += 1
-    for index, (key, value) in enumerate(d.items(), start=1):
+    @singledispatchmethod
+    def dump(self, obj, env):
+        raise NotImplementedError(f"Cannot dump node {repr(obj)}")
+    
+    to_json = dump.register
+    
+    @to_json(dict)
+    def dict_to_json(self, d, env):
+        env.write('{', indent=0)
         if env.indent:
-            env.write('')
-        _dump(key, env)
-        env.write(': ', indent=0)
-        _dump(value, env)
-        if index == len(d):
-            break
-        if env.indent:
-            env.write(',', indent=0)
-            env.write('\n', indent=0)
-        else:
-            env.write(', ', indent=0)
-
-    if env.indent:
-        env.indent_level -= 1
-        env.write('\n')
-        env.write('}')
-    else:
-        env.write('}', indent=0)
-
-
-@to_json(int)
-def int_to_json(i, env):
-    env.write(str(i), indent=0)
-
-
-@to_json(str)
-def str_to_json(s, env):
-    env.write(json.dumps(s), indent=0)
-    # if isinstance(s, JsonIdentifier):
-    #     quote_char = None
-    # elif "'" in s:
-    #     quote_char = '"'
-    # else:
-    #     quote_char = "'"
-    #
-    # if quote_char:
-    #     env.write(quote_char, indent=0)
-    # env.write(s, indent=0)
-    # if quote_char:
-    #     env.write(quote_char, indent=0)
-
-
-@to_json(list)
-def list_to_json(l, env):
-    env.write('[', indent=0)
-    if env.indent:
-        env.indent_level += 1
-        env.write('\n', indent=0)
-    list_length = len(l)
-    for index, item in enumerate(l, start=1):
-        if env.indent:
-            env.write('')
-        _dump(item, env)
-        if index != list_length:
+            env.write('\n')
+            env.indent_level += 1
+        for index, (key, value) in enumerate(d.items(), start=1):
+            if env.indent:
+                env.write('')
+            self.dump(key, env)
+            env.write(': ', indent=0)
+            self.dump(value, env)
+            if index == len(d):
+                break
             if env.indent:
                 env.write(',', indent=0)
+                env.write('\n', indent=0)
             else:
                 env.write(', ', indent=0)
+    
         if env.indent:
+            env.indent_level -= 1
+            env.write('\n')
+            env.write('}')
+        else:
+            env.write('}', indent=0)
+    
+    
+    @to_json(int)
+    def int_to_json(self, i, env):
+        env.write(str(i), indent=0)
+    
+    
+    @to_json(str)
+    def str_to_json(self, s, env):
+        env.write(json.dumps(s), indent=0)
+        # if isinstance(s, JsonIdentifier):
+        #     quote_char = None
+        # elif "'" in s:
+        #     quote_char = '"'
+        # else:
+        #     quote_char = "'"
+        #
+        # if quote_char:
+        #     env.write(quote_char, indent=0)
+        # env.write(s, indent=0)
+        # if quote_char:
+        #     env.write(quote_char, indent=0)
+    
+    
+    @to_json(list)
+    def list_to_json(self, l, env):
+        env.write('[', indent=0)
+        if env.indent:
+            env.indent_level += 1
             env.write('\n', indent=0)
-    if env.indent:
-        env.indent_level -= 1
-    env.write(']')
-
-
-@to_json(float)
-def float_to_json(f, env):
-    if f == math.inf:
-        env.write('Infinity', indent=0)
-    elif f == -math.inf:
-        env.write('-Infinity', indent=0)
-    elif f is math.nan:
-        env.write('NaN', indent=0)
-    else:
-        env.write(str(f), indent=0)
-
+        list_length = len(l)
+        for index, item in enumerate(l, start=1):
+            if env.indent:
+                env.write('')
+            self.dump(item, env)
+            if index != list_length:
+                if env.indent:
+                    env.write(',', indent=0)
+                else:
+                    env.write(', ', indent=0)
+            if env.indent:
+                env.write('\n', indent=0)
+        if env.indent:
+            env.indent_level -= 1
+        env.write(']')
+    
+    
+    @to_json(float)
+    def float_to_json(self, f, env):
+        if f == math.inf:
+            env.write('Infinity', indent=0)
+        elif f == -math.inf:
+            env.write('-Infinity', indent=0)
+        elif f is math.nan:
+            env.write('NaN', indent=0)
+        else:
+            env.write(str(f), indent=0)
+    
