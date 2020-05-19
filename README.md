@@ -13,6 +13,8 @@ JSON5 for Python
 pip install json-five
 ```
 
+This project has just one requirement: the [`sly`](https://github.com/dabeaz/sly) package.
+
 ## Usage
 
 **NOTE:** the import name is different from the install name (sorry, many were taken already)
@@ -49,7 +51,7 @@ milestones that hopefully will be able to be marked as done as development progr
   - [x] leading plus for numbers
   - [x] single quoted strings
   - [x] escape characters in strings
-- [ ] dump python to JSON (no comment support)
+- [x] dump python to JSON (no comment support)
   - [x] indent style (that matches `json`)
   - [ ] style options (quotes, trailing commas, etc)
   - [ ] helper classes for dumping types as other literals (hexadecimal numbers, identifiers, etc)
