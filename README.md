@@ -48,7 +48,8 @@ milestones that hopefully will be able to be marked as done as development progr
   - [x] indent style (that matches `json`)
   - [ ] style options (quotes, trailing commas, etc)
   - [ ] helper classes for dumping types as other literals (hexadecimal numbers, identifiers, etc)
-  - [ ] support similar options to `json` (e.g. `object_hook`, `parse_x`, `strict`, `ensure_ascii`, etc)
+  - [x] load/loads to support similar options to `json` (e.g. `object_hook`, `parse_x`, etc)
+  - [ ] dump/dumps to support similar options to `json` module (e.g. hooks, `ensure_ascii`, etc)
   - [ ] string escapes according to quote style
 - [ ] support manipulation of json model (e.g. to add/edit comments)
 - [ ] dump json model with comments
