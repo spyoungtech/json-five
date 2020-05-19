@@ -71,12 +71,12 @@ def test_round_trip_model_load_dump(json_string):
 #     assert loads(json_string, loader=ModelLoader()) == {"foo": "bar"}
 #
 #
-# def test_object_load_with_line_comment():
-#     json_string = """{ // line comment
-#     "foo": "bar"
-#     }"""
-#     assert loads(json_string, loader=ModelLoader()) == {"foo": "bar"}
-#
+def test_object_load_with_line_comment():
+    json_string = """{ // line comment
+    "foo": "bar"
+    }"""
+    assert dumps(loads(json_string, loader=ModelLoader()), dumper=ModelDumper()) == json_string
+
 #
 # def test_object_with_multiline_comment():
 #     json_string = """{ /* foo bar

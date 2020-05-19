@@ -264,7 +264,6 @@ class ModelDumper:
     @to_json(LineComment)
     def line_comment_to_json(self, node):
         self.process_wsc_before(node)
-        self.env.write('//') # ??? do I need this
         self.env.write(node.value)
         self.process_wsc_after(node)
 
