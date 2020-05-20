@@ -81,7 +81,7 @@ def test_mixed_usage_quotes():
 
 
 def test_trailing_comma_object():
-    json_string = """{"foo": "bar",}"""
+    json_string = """{"foo": "bar", }"""
     assert loads(json_string) == {"foo": "bar"}
 
 
@@ -221,7 +221,7 @@ def test_hexadecimal_load():
     json_string = """
     {
     positiveHex: 0xdecaf,
-    negativeHex: -0xC0FFEE,}"""
+    negativeHex: -0xC0FFEE ,}"""
     assert loads(json_string) == {"positiveHex": 0xDECAF, "negativeHex": -0xC0FFEE}
 
 

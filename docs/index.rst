@@ -17,7 +17,7 @@ Welcome to json-five's documentation!
    QuickStart
    extending
    how
-
+   comments
 
 Indices and tables
 ==================

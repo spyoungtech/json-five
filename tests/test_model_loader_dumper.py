@@ -42,7 +42,7 @@ def test_object_load_with_line_comment():
 
 def test_object_with_multiline_comment():
     json_string = """{ /* foo bar
-    */ "foo": "bar"
+    */ "foo": "bar" // Foobar
     }"""
     assert dumps(loads(json_string, loader=ModelLoader()), dumper=ModelDumper()) == json_string
 
