@@ -281,9 +281,3 @@ def parse_source(text):
     if model is None:
         raise SyntaxError('Was expecting a JSON value, got none. This was probably due to a syntax error while parsing')
     return model
-
-if __name__ == '__main__':
-    fp = sys.argv[1]
-    with open(fp) as f:
-        text = f.read()
-    print(repr(parse_source(text)))

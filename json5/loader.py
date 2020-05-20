@@ -139,11 +139,3 @@ class DefaultLoader:
 class ModelLoader(DefaultLoader):
     def load(self, node, env):
         return node
-
-
-
-if __name__ == '__main__':
-    fp = sys.argv[1]
-    with open(fp) as f:
-        text = f.read()
-    print(repr(loads(text)))

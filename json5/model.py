@@ -6,6 +6,7 @@ from decimal import Decimal
 
 
 class Node(SimpleNamespace):
+    excluded_names = ['excluded_names', 'wsc_before', 'wsc_after']
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Whitespace/Comments before/after the node
@@ -17,7 +18,7 @@ class Node(SimpleNamespace):
             f"{self.__class__.__name__}("
             + ", ".join(
                 "{key}={value}".format(key=key, value=repr(value))
-                for key, value in self.__dict__.items()
+                for key, value in self.__dict__.items() if key not in self.excluded_names
             )
             + ")"
         )
@@ -160,8 +161,4 @@ class LineComment(Comment):
     ...
 
 class BlockComment(Comment):
-    ...
-
-
-class WhiteSpace(Node):
     ...
