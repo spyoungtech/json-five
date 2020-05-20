@@ -6,7 +6,7 @@ with open('README.md', encoding='utf-8') as f:
 
 setup(
     name='json-five',
-    version='0.0.4',
+    version='0.1.0',
     packages=['json5'],
     url='https://github.com/spyoungtech/json-five',
     license='Apache',
