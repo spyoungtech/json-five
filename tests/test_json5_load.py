@@ -1,8 +1,9 @@
 import math
 
 import pytest
-from json5.loader import loads, JsonIdentifier
+from json5.loader import loads, JsonIdentifier, load
 from sly.lex import LexError
+from io import StringIO
 
 
 def test_object_string_key_value_pair():
@@ -239,3 +240,7 @@ def test_null_load():
 def test_unary_plus_load():
     json_string = """{foo: +12 }"""
     assert loads(json_string) == {'foo': 12}
+
+def test_load_from_file():
+    f = StringIO('{foo: 123}')
+    assert load(f) == {'foo': 123}
