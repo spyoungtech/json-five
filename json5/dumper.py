@@ -133,6 +133,10 @@ class DefaultDumper:
         else:
             self.env.write(str(f), indent=0)
 
+    @to_json(bool)
+    def bool_to_json(self, b):
+        self.env.write(str(b).lower(), indent=0)
+
 
 class ModelDumper:
     """
@@ -315,7 +319,8 @@ class Modelizer:
     @to_model(int)
     def int_to_model(self, i):
         return Integer(str(i))
-    
+
+
     @to_model(float)
     def float_to_model(self, f):
         if f == math.inf:
@@ -326,6 +331,10 @@ class Modelizer:
             return NaN()
         else:
             return Float(str(f))
+
+    @to_model(bool)
+    def bool_to_model(self, b):
+        return BooleanLiteral(b)
 
 
 def modelize(obj):

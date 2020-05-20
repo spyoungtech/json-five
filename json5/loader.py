@@ -22,11 +22,20 @@ class JsonIdentifier(UserString):
     ...
 
 def load(f, **kwargs):
+    """
+    Like loads, but takes a file-like object with a read method.
+
+    :param f:
+    :param kwargs:
+    :return:
+    """
     text = f.read()
     return loads(text)
 
 def loads(s, *args, loader=None, **kwargs):
     """
+    Take a string of JSON text and deserialize it
+
     :param s:
     :param loader: The loader class to use
     :param object_hook: same meaning as in ``json.loads``

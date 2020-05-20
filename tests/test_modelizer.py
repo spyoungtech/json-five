@@ -16,6 +16,8 @@ import pytest, math
     -2,
     math.inf,
     -math.inf,
+    True,
+    False
 ])
 def test_modelize_objects(obj):
     assert loads(dumps(modelize(obj), dumper=ModelDumper())) == obj

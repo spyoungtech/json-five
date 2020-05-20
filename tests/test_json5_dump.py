@@ -34,3 +34,7 @@ def test_dump_indent_same_as_json():
         "lists": ['foo', ['nested_list']],
     }
     assert dumps(d, indent=4) == json.dumps(d, indent=4)
+
+def test_dump_boolean():
+    d = {'foo': True}
+    assert dumps(d) == json.dumps(d)

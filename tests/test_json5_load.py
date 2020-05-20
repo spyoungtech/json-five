@@ -222,3 +222,8 @@ def test_hexadecimal_load():
     positiveHex: 0xdecaf,
     negativeHex: -0xC0FFEE,}"""
     assert loads(json_string) == {"positiveHex": 0xDECAF, "negativeHex": -0xC0FFEE}
+
+
+def test_boolean_load():
+    json_string = """{foo: true}"""
+    assert loads(json_string) == {'foo': True}
