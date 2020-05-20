@@ -28,3 +28,6 @@ def test_modelize_nan():
     obj = math.nan
     assert loads(dumps(modelize(obj), dumper=ModelDumper())) is obj
 
+def test_modelize_double_quote_string():
+    s = "'"
+    assert loads(dumps(modelize(s), dumper=ModelDumper())) == s

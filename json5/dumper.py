@@ -293,7 +293,7 @@ class Modelizer:
     """
     @singledispatchmethod
     def modelize(self, obj):
-        raise ValueError(f"Cannot modelize object of type {type(obj)}")
+        raise NotImplementedError(f"Cannot modelize object of type {type(obj)}")
     
     to_model = modelize.register
     
