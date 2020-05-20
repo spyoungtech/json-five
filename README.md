@@ -61,9 +61,10 @@ milestones that hopefully will be able to be marked as done as development progr
   - [x] load/loads to support similar options to `json` (e.g. `object_hook`, `parse_x`, etc)
   - [ ] dump/dumps to support similar options to `json` module (e.g. hooks, `ensure_ascii`, etc)
   - [ ] string escapes according to quote style
-- [ ] support manipulation of json model (e.g. to add/edit comments)
-- [ ] dump json model with comments
-- [ ] preserve comments when loading json5 (round-trip support)
+- [x] support manipulation of json model (e.g. to add/edit comments)
+- [x] dump json model with comments
+- [x] preserve comments when loading json5 (round-trip support)
+- [ ] Transparent model modification with Python datatype-like objects with methods for modifying comments
 
 ...
 
