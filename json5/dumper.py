@@ -1,7 +1,5 @@
-import sys
 from .utils import singledispatchmethod
 from json5.model import *
-from json5.loader import JsonIdentifier
 from collections import UserDict
 import json
 import io
@@ -37,6 +35,9 @@ def dumps(obj, dumper=None, indent=0):
     return dumper.env.outfile.read()
 
 class DefaultDumper:
+    """
+    Dump Python objects to a JSON string
+    """
     def __init__(self, env=None):
         if env is None:
             env = Environment()
@@ -134,6 +135,9 @@ class DefaultDumper:
 
 
 class ModelDumper:
+    """
+    Dump a model to a JSON string
+    """
     def __init__(self, env=None):
         #  any provided environment is ignored
         self.env = Environment()
@@ -266,6 +270,7 @@ class ModelDumper:
     @to_json(Infinity)
     def infinity_to_json(self, node):
         self.process_wsc_before(node)
+
         self.env.write('Infinity')
         self.process_wsc_after(node)
 
@@ -274,3 +279,59 @@ class ModelDumper:
         self.process_wsc_before(node)
         self.env.write('NaN')
         self.process_wsc_after(node)
+
+class Modelizer:
+    """
+    Turn Python objects into a model
+    """
+    @singledispatchmethod
+    def modelize(self, obj):
+        raise ValueError(f"Cannot modelize object of type {type(obj)}")
+    
+    to_model = modelize.register
+    
+    @to_model(str)
+    def str_to_model(self, s):
+        if repr(s).startswith("'"):
+            return SingleQuotedString(s, raw_value=repr(s))
+        else:
+            return DoubleQuotedString(s, raw_value=repr(s))
+    
+    @to_model(dict)
+    def dict_to_model(self, d):
+        kvps = []
+        for key, value in d.items():
+            kvp = KeyValuePair(key=self.modelize(key), value=self.modelize(value))
+            kvps.append(kvp)
+        return JSONObject(*kvps)
+    
+    @to_model(list)
+    def list_to_model(self, lst):
+        list_values = []
+        for v in lst:
+            list_values.append(self.modelize(v))
+        return JSONArray(*list_values)
+    
+    @to_model(int)
+    def int_to_model(self, i):
+        return Integer(str(i))
+    
+    @to_model(float)
+    def float_to_model(self, f):
+        if f == math.inf:
+            return Infinity()
+        elif f == -math.inf:
+            return UnaryOp('-', Infinity())
+        elif f is math.nan:
+            return NaN()
+        else:
+            return Float(str(f))
+
+
+def modelize(obj):
+    """
+
+    :param obj: a python object
+    :return: a model representing the python object
+    """
+    return Modelizer().modelize(obj)
