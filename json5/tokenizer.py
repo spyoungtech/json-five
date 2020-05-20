@@ -97,18 +97,7 @@ class JSONLexer(Lexer):
     NAME['try'] = TRY
 
 
-
-
 def tokenize(text):
     lexer = JSONLexer()
     tokens = lexer.tokenize(text)
     return tokens
-    for tok in tokens:
-        logger.debug(tok)
-    return lexer.tokenize(text)
-
-if __name__ == '__main__':
-    fp = sys.argv[1]
-    with open(fp) as f:
-        text = f.read()
-    tokenize(text)

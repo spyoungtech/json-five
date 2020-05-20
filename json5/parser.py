@@ -19,12 +19,14 @@ ESCAPE_SEQUENCES = {
     "'": '\u0027',
 }
 
-class TrailingComma:
-    pass
+# class TrailingComma:
+#     pass
+
 
 def replace_escape_literals(matchobj):
     seq = matchobj.group(1)
     return ESCAPE_SEQUENCES.get(seq, seq)
+
 
 class JSONParser(Parser):
     # debugfile = 'parser.out'
@@ -40,29 +42,49 @@ class JSONParser(Parser):
     def first_key_value_pair(self, p):
         return KeyValuePair(key=p.key, value=p.value)
 
-    @_('COMMA [ key COLON value ]')
+    @_('COMMA { whitespace_andor_comment } [ key COLON value ]')
     def subsequent_key_value_pair(self, p):
         if p.key and p.value:
+            for wsc in p.whitespace_andor_comment:
+                p.key.wsc_before.append(wsc)
             return KeyValuePair(key=p.key, value=p.value)
         else:
-            return TrailingComma
+            node = TrailingComma()
+            for wsc in p.whitespace_andor_comment:
+                node.wsc_after.append(wsc)
+            return node
+
 
     @_('WHITESPACE',
        'comment')
     def whitespace_andor_comment(self, p):
         return p[0]
 
-    @_('[ WHITESPACE ] BLOCK_COMMENT [ WHITESPACE ]',
-       '[ WHITESPACE ] LINE_COMMENT [ WHITESPACE ]')
+    @_('[ WHITESPACE ] BLOCK_COMMENT [ WHITESPACE ]')
     def comment(self, p):
-        return CommentOrWhiteSpace(p[1])
+        node = BlockComment(p[1])
+        if p.WHITESPACE0:
+            node.wsc_before.append(p.WHITESPACE0)
+        if p.WHITESPACE1:
+            node.wsc_after.append(p.WHITESPACE1)
+        return node
+
+    @_('[ WHITESPACE ] LINE_COMMENT [ WHITESPACE ]')
+    def comment(self, p):
+        node = LineComment(p[1])
+        if p.WHITESPACE0:
+            node.wsc_before.append(p.WHITESPACE0)
+        if p.WHITESPACE1:
+            node.wsc_after.append(p.WHITESPACE1)
+        return node
+
 
     @_('first_key_value_pair { subsequent_key_value_pair }')
     def key_value_pairs(self, p):
         ret = [p.first_key_value_pair, ]
         for kvp in p.subsequent_key_value_pair:
-            if kvp is TrailingComma:
-                return ret, TrailingComma
+            if isinstance(kvp, TrailingComma):
+                return ret, kvp
             ret.append(kvp)
         return ret, None
 
@@ -73,7 +95,7 @@ class JSONParser(Parser):
         if not p.key_value_pairs:
             return JSONObject()
         kvps, trailing_comma = p.key_value_pairs
-        return JSONObject(*kvps, trailing_comma=bool(trailing_comma))
+        return JSONObject(*kvps, trailing_comma=trailing_comma)
 
     @_('value')
     def first_array_value(self, p):
@@ -81,14 +103,23 @@ class JSONParser(Parser):
 
     @_('COMMA { whitespace_andor_comment } [ value ]')
     def subsequent_array_value(self, p):
-        return p.value or TrailingComma
+        if p.value:
+            node = p.value
+            for wsc in p.whitespace_andor_comment:
+                node.wsc_before.append(wsc)  # Wouldn't the value already take care of this? reduce...reduce....
+        else:
+            node = TrailingComma()
+            for wsc in p.whitespace_andor_comment:
+                node.wsc_after.append(wsc)
+
+        return node
 
     @_('first_array_value { subsequent_array_value }')
     def array_values(self, p):
         ret = [p.first_array_value, ]
         for value in p.subsequent_array_value:
-            if value is TrailingComma:
-                return ret, TrailingComma
+            if isinstance(value, TrailingComma):
+                return ret, value
             ret.append(value)
         return ret, None
 
@@ -98,7 +129,7 @@ class JSONParser(Parser):
         if not p.array_values:
             return JSONArray()
         values, trailing_comma = p.array_values
-        return JSONArray(*values, trailing_comma=bool(trailing_comma))
+        return JSONArray(*values, trailing_comma=trailing_comma)
 
 
 
@@ -109,7 +140,12 @@ class JSONParser(Parser):
     @_('{ whitespace_andor_comment } identifier { whitespace_andor_comment }',
        '{ whitespace_andor_comment } string { whitespace_andor_comment }')
     def key(self, p):
-        return p[1]
+        node = p[1]
+        for wsc in p.whitespace_andor_comment0:
+            node.wsc_before.append(wsc)
+        for wsc in p.whitespace_andor_comment1:
+            node.wsc_after.append(wsc)
+        return node
 
     @_('INTEGER')
     def number(self, p):
@@ -131,11 +167,21 @@ class JSONParser(Parser):
     def value(self, p):
         if isinstance(p.number, Infinity):
             p.number.negative = True
-        return UnaryOp(op='-', value=p.number)
+        node = UnaryOp(op='-', value=p.number)
+        for wsc in p.whitespace_andor_comment0:
+            node.wsc_before.append(wsc)
+        for wsc in p.whitespace_andor_comment1:
+            node.wsc_after.append(wsc)
+        return node
 
     @_('{ whitespace_andor_comment } PLUS number { whitespace_andor_comment }')
     def value(self, p):
-        return UnaryOp(op='+', value=p.number)
+        node = UnaryOp(op='+', value=p.number)
+        for wsc in p.whitespace_andor_comment0:
+            node.wsc_before.append(wsc)
+        for wsc in p.whitespace_andor_comment1:
+            node.wsc_after.append(wsc)
+        return node
 
     @_('INTEGER EXPONENT',
        'FLOAT EXPONENT')
@@ -149,17 +195,19 @@ class JSONParser(Parser):
 
     @_('DOUBLE_QUOTE_STRING')
     def double_quoted_string(self, p):
-        contents = p[0][1:-1]
+        raw_value = p[0]
+        contents = raw_value[1:-1]
         contents = re.sub(r'\\(\r\n|[\u000A\u000D\u2028\u2029])', '', contents)
         contents = re.sub(r'\\(.)', replace_escape_literals, contents)
-        return DoubleQuotedString(contents)
+        return DoubleQuotedString(contents, raw_value=raw_value)
 
     @_("SINGLE_QUOTE_STRING")
     def single_quoted_string(self, p):
-        contents = p[0][1:-1]
+        raw_value = p[0]
+        contents = raw_value[1:-1]
         contents = re.sub(r'\\(\r\n|[\u000A\u000D\u2028\u2029])', '', contents)
         contents = re.sub(r'\\(.)', replace_escape_literals, contents)
-        return SingleQuotedString(contents)
+        return SingleQuotedString(contents, raw_value=raw_value)
 
     @_('double_quoted_string',
        'single_quoted_string')
@@ -185,7 +233,12 @@ class JSONParser(Parser):
        '{ whitespace_andor_comment } null { whitespace_andor_comment }',
        '{ whitespace_andor_comment } number { whitespace_andor_comment }',)
     def value(self, p):
-        return p[1]
+        node = p[1]
+        for wsc in p.whitespace_andor_comment0:
+            node.wsc_before.append(wsc)
+        for wsc in p.whitespace_andor_comment1:
+            node.wsc_after.append(wsc)
+        return node
 
     @_('BREAK',
     'DO',
@@ -228,9 +281,3 @@ def parse_source(text):
     if model is None:
         raise SyntaxError('Was expecting a JSON value, got none. This was probably due to a syntax error while parsing')
     return model
-
-if __name__ == '__main__':
-    fp = sys.argv[1]
-    with open(fp) as f:
-        text = f.read()
-    print(repr(parse_source(text)))

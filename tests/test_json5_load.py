@@ -1,8 +1,9 @@
 import math
 
 import pytest
-from json5.loader import loads, JsonIdentifier
+from json5.loader import loads, JsonIdentifier, load
 from sly.lex import LexError
+from io import StringIO
 
 
 def test_object_string_key_value_pair():
@@ -80,7 +81,7 @@ def test_mixed_usage_quotes():
 
 
 def test_trailing_comma_object():
-    json_string = """{"foo": "bar",}"""
+    json_string = """{"foo": "bar", }"""
     assert loads(json_string) == {"foo": "bar"}
 
 
@@ -220,5 +221,26 @@ def test_hexadecimal_load():
     json_string = """
     {
     positiveHex: 0xdecaf,
-    negativeHex: -0xC0FFEE,}"""
+    negativeHex: -0xC0FFEE ,}"""
     assert loads(json_string) == {"positiveHex": 0xDECAF, "negativeHex": -0xC0FFEE}
+
+
+def test_boolean_load_true():
+    json_string = """{foo: true}"""
+    assert loads(json_string) == {'foo': True}
+
+def test_boolean_load_false():
+    json_string = """{foo: false}"""
+    assert loads(json_string) == {'foo': False}
+
+def test_null_load():
+    json_string = """{foo: null}"""
+    assert loads(json_string) == {'foo': None}
+
+def test_unary_plus_load():
+    json_string = """{foo: +12 }"""
+    assert loads(json_string) == {'foo': 12}
+
+def test_load_from_file():
+    f = StringIO('{foo: 123}')
+    assert load(f) == {'foo': 123}

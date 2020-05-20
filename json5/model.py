@@ -6,12 +6,19 @@ from decimal import Decimal
 
 
 class Node(SimpleNamespace):
+    excluded_names = ['excluded_names', 'wsc_before', 'wsc_after']
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Whitespace/Comments before/after the node
+        self.wsc_before = []
+        self.wsc_after = []
+
     def __repr__(self):
         rep = (
             f"{self.__class__.__name__}("
             + ", ".join(
                 "{key}={value}".format(key=key, value=repr(value))
-                for key, value in self.__dict__.items()
+                for key, value in self.__dict__.items() if key not in self.excluded_names
             )
             + ")"
         )
@@ -108,17 +115,19 @@ class String(Value, Key):
     ...
 
 class DoubleQuotedString(String):
-    def __init__(self, characters):
+    def __init__(self, characters, raw_value):
+        assert isinstance(raw_value, str)
         characters = characters
         assert isinstance(characters, str)
-        super().__init__(characters=characters)
+        super().__init__(characters=characters, raw_value=raw_value)
 
 
 class SingleQuotedString(String):
-    def __init__(self, characters):
+    def __init__(self, characters, raw_value):
+        assert isinstance(raw_value, str)
         characters = characters
         assert isinstance(characters, str)
-        super().__init__(characters=characters)
+        super().__init__(characters=characters, raw_value=raw_value)
 
 
 class BooleanLiteral(Value):
@@ -138,8 +147,18 @@ class UnaryOp(Value):
         assert isinstance(value, Number)
         super().__init__(op=op, value=value)
 
+class TrailingComma(Node):
+    ...
 
-class CommentOrWhiteSpace(Node):
+
+class Comment(Node):
     def __init__(self, value):
         assert isinstance(value, str), f"Expected str got {type(value)}"
         super().__init__(value=value)
+
+
+class LineComment(Comment):
+    ...
+
+class BlockComment(Comment):
+    ...
