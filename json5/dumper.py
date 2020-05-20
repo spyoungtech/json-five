@@ -137,6 +137,9 @@ class DefaultDumper:
     def bool_to_json(self, b):
         self.env.write(str(b).lower(), indent=0)
 
+    @to_json(type(None))
+    def none_to_json(self, _):
+        self.env.write('null', indent=0)
 
 class ModelDumper:
     """
@@ -335,6 +338,10 @@ class Modelizer:
     @to_model(bool)
     def bool_to_model(self, b):
         return BooleanLiteral(b)
+
+    @to_model(type(None))
+    def none_to_model(self, _):
+        return NullLiteral()
 
 
 def modelize(obj):

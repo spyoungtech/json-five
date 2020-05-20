@@ -38,3 +38,13 @@ def test_dump_indent_same_as_json():
 def test_dump_boolean():
     d = {'foo': True}
     assert dumps(d) == json.dumps(d)
+
+
+def test_dump_bool_false():
+    d = {'foo': False}
+    assert dumps(d) == json.dumps(d)
+
+
+def test_dump_none():
+    d = {'foo': None}
+    assert dumps(d) == json.dumps(d)

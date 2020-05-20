@@ -224,6 +224,14 @@ def test_hexadecimal_load():
     assert loads(json_string) == {"positiveHex": 0xDECAF, "negativeHex": -0xC0FFEE}
 
 
-def test_boolean_load():
+def test_boolean_load_true():
     json_string = """{foo: true}"""
     assert loads(json_string) == {'foo': True}
+
+def test_boolean_load_false():
+    json_string = """{foo: false}"""
+    assert loads(json_string) == {'foo': False}
+
+def test_null_load():
+    json_string = """{foo: null}"""
+    assert loads(json_string) == {'foo': None}
