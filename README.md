@@ -2,6 +2,7 @@
 
 JSON5 for Python
 
+[![Documentation Status](https://readthedocs.org/projects/json-five/badge/?version=latest)](https://json-five.readthedocs.io/en/latest/?badge=latest) 
 [![Build Status](https://travis-ci.com/spyoungtech/json-five.svg?branch=master)](https://travis-ci.com/spyoungtech/json-five) 
 [![version](https://img.shields.io/pypi/v/json-five.svg?colorB=blue)](https://pypi.org/project/json-five/) 
 [![pyversion](https://img.shields.io/pypi/pyversions/json-five.svg?)](https://pypi.org/project/json-five/) 
@@ -30,6 +31,8 @@ comment that can span lines /*
 >>> json5.loads(json_text)
 {"foo": "bar", "bacon": "eggs"}
 ```
+
+See also the [full documentation](https://json-five.readthedocs.io/en/latest/)
 
 ## Project goals
 
