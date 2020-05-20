@@ -14,7 +14,7 @@ setup(
     author_email='spencer.young@spyoung.com',
     description='A JSON5 parser that, among other features, supports round-trip preservation of comments',
     long_description=long_description,
-    long_description_content_type='test/markdown',
+    long_description_content_type='text/markdown',
     install_requires=['sly'],
     classifiers=[
         'License :: OSI Approved :: Apache Software License',
