@@ -235,3 +235,7 @@ def test_boolean_load_false():
 def test_null_load():
     json_string = """{foo: null}"""
     assert loads(json_string) == {'foo': None}
+
+def test_unary_plus_load():
+    json_string = """{foo: +12 }"""
+    assert loads(json_string) == {'foo': 12}

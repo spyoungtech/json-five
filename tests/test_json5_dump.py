@@ -1,4 +1,6 @@
 from json5 import dumps, loads
+from json5.dumper import ModelDumper
+from json5.model import UnaryOp, Integer
 import json
 import math
 
@@ -48,3 +50,6 @@ def test_dump_bool_false():
 def test_dump_none():
     d = {'foo': None}
     assert dumps(d) == json.dumps(d)
+
+def test_dump_unary_plus():
+    assert dumps(UnaryOp('+', Integer('1')), dumper=ModelDumper()) == '+1'
