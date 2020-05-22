@@ -3,8 +3,20 @@ import re
 import sys
 
 from sly import Parser
+from sly.yacc import SlyLogger
 from json5.tokenizer import JSONLexer, tokenize
 from json5.model import *
+from json5.utils import JSON5DecodeError
+
+
+class QuietSlyLogger(SlyLogger):
+    def debug(self, *args, **kwargs):
+        return
+    info = debug
+
+    def warning(self, *args, **kwargs):
+        return
+
 
 ESCAPE_SEQUENCES = {
     'b': '\u0008',
@@ -31,6 +43,11 @@ def replace_escape_literals(matchobj):
 class JSONParser(Parser):
     # debugfile = 'parser.out'
     tokens = JSONLexer.tokens
+    log = QuietSlyLogger(sys.stderr)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.errors = []
 
 
     @_('value')
@@ -267,7 +284,36 @@ class JSONParser(Parser):
     'IN',
     'TRY',)
     def identifier(self, p):
-        raise SyntaxError(f"{p[0]} is a reserved keyword and may not be used")
+        err = JSON5DecodeError(f"Illegal name at line {p.lineno}: {p[0]} is a reserved keyword and may not be used", None)
+        err.lineno = p.lineno
+        err.index = p.index
+        self.errors.append(err)
+        return Identifier(name=p[0])
+
+    def error(self, token):
+        if token:
+            self.errors.append(JSON5DecodeError('Syntax Error', token))
+        else:
+            self.errors.append(JSON5DecodeError('Expecting value. Received unexpected EOF', None))
+
+    def parse(self, *args, **kwargs):
+        model = super().parse(*args, **kwargs)
+        if self.errors:
+            if len(self.errors) > 1:
+                primary_error = self.errors[0]
+                additional_errors = '\n\t'.join(err.args[0] for err in self.errors[1:])
+                msg = "There were multiple errors parsing the JSON5 document.\n" \
+                      "The primary error was: \n\t{}\n" \
+                      "Additionally, the following errors were also detected:\n\t {}"
+                msg = msg.format(primary_error.args[0], additional_errors)
+                err = JSON5DecodeError(msg, None)
+                err.lineno = primary_error.lineno
+                err.token = primary_error.token
+                err.index = primary_error.index
+                raise err
+            else:
+                raise self.errors[0]
+        return model
 
 
 def parse_tokens(raw_tokens):
@@ -278,6 +324,4 @@ def parse_tokens(raw_tokens):
 def parse_source(text):
     tokens = tokenize(text)
     model = parse_tokens(tokens)
-    if model is None:
-        raise SyntaxError('Was expecting a JSON value, got none. This was probably due to a syntax error while parsing')
     return model

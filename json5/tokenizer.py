@@ -1,7 +1,7 @@
 import re
 import sys
 from sly import Lexer
-
+from json5.utils import JSON5DecodeError
 import logging
 
 logger = logging.getLogger(__name__)
@@ -96,6 +96,8 @@ class JSONLexer(Lexer):
     NAME['in'] = IN
     NAME['try'] = TRY
 
+    def error(self, t):
+        raise JSON5DecodeError(f'Illegal character {t.value[0]!r} at index {self.index}', None)
 
 def tokenize(text):
     lexer = JSONLexer()
