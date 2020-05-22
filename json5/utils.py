@@ -18,15 +18,18 @@ class JSON5DecodeError(JSONDecodeError):
     def __init__(self, msg, token):
         lineno = getattr(token, 'lineno', 0)
         index = getattr(token, 'index', 0)
-        if token:
-            errmsg = f'{msg}: at line {lineno} index {index} token={token.type}'
-        else:
-            errmsg = msg
-        ValueError.__init__(self, errmsg)
-        self.msg = msg
-        self.lineno = lineno
-        self.index = index
+        doc = getattr(token, 'doc', None)
         self.token = token
+        self.index = index
+        if token and doc:
+            errmsg = f'{msg} in or near token {token.type} at'
+            super().__init__(errmsg, doc, index)
+        else:
+            ValueError.__init__(self, msg)
+            self.msg = msg
+            self.lineno = lineno
 
     def __reduce__(self):
         return self.__class__, (self.msg, self.token)
+
+

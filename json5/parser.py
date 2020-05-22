@@ -215,8 +215,8 @@ class JSONParser(Parser):
         raw_value = p[0]
         contents = raw_value[1:-1]
         if re.search(r'(?<!\\)([\u000D\u2028\u2029]|(?<!\r)\n)', contents):
-            errmsg = f"Illegal line terminator without continuation in string at line {p.lineno}"
-            self.errors.append(JSON5DecodeError(errmsg, None))
+            errmsg = f"Illegal line terminator without continuation"
+            self.errors.append(JSON5DecodeError(errmsg, p._slice[0]))
         contents = re.sub(r'\\(\r\n|[\u000A\u000D\u2028\u2029])', '', contents)
         contents = re.sub(r'\\(.)', replace_escape_literals, contents)
         return DoubleQuotedString(contents, raw_value=raw_value)
@@ -226,8 +226,8 @@ class JSONParser(Parser):
         raw_value = p[0]
         contents = raw_value[1:-1]
         if re.search(r'(?<!\\)([\u000D\u2028\u2029]|(?<!\r)\n)', contents):
-            errmsg = f"Illegal line terminator without continuation in string at line {p.lineno}"
-            self.errors.append(JSON5DecodeError(errmsg, None))
+            errmsg = f"Illegal line terminator without continuation"
+            self.errors.append(JSON5DecodeError(errmsg, p._slice[0]))
         contents = re.sub(r'\\(\r\n|[\u000A\u000D\u2028\u2029])', '', contents)
         contents = re.sub(r'\\(.)', replace_escape_literals, contents)
         return SingleQuotedString(contents, raw_value=raw_value)
@@ -290,9 +290,7 @@ class JSONParser(Parser):
     'IN',
     'TRY',)
     def identifier(self, p):
-        err = JSON5DecodeError(f"Illegal name at line {p.lineno}: {p[0]} is a reserved keyword and may not be used", None)
-        err.lineno = p.lineno
-        err.index = p.index
+        err = JSON5DecodeError(f"Illegal name ({p[0]}) is a reserved keyword and may not be used", p._slice[0])
         self.errors.append(err)
         return Identifier(name=p[0])
 

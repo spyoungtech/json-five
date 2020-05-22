@@ -1,12 +1,28 @@
 import re
 import sys
 from sly import Lexer
+from sly.lex import Token
 from json5.utils import JSON5DecodeError
 import logging
 
 logger = logging.getLogger(__name__)
 # logger.addHandler(logging.StreamHandler(stream=sys.stderr))
 # logger.setLevel(level=logging.DEBUG)
+class JSON5Token(Token):
+    '''
+    Representation of a single token.
+    '''
+    def __init__(self, tok, doc):
+        self.type = tok.type
+        self.value = tok.value
+        self.lineno = tok.lineno
+        self.index = tok.index
+        self.doc = doc
+    __slots__ = ('type', 'value', 'lineno', 'index', 'doc')
+
+    def __repr__(self):
+        return f'JSON5Token(type={self.type!r}, value={self.value!r}, lineno={self.lineno}, index={self.index})'
+
 
 class JSONLexer(Lexer):
     reflags = re.DOTALL
@@ -30,6 +46,11 @@ class JSONLexer(Lexer):
               INFINITY, NAN, EXPONENT,
               HEXADECIMAL
               }
+
+    def tokenize(self, text, *args, **kwargs):
+        for tok in super().tokenize(text, *args, **kwargs):
+            tok = JSON5Token(tok, text)
+            yield tok
 
     LBRACE = r'{'
     RBRACE = r'}'
