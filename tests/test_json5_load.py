@@ -134,14 +134,6 @@ def test_line_continuations_alternate_terminators(terminator):
     assert loads(json_string) == "Hello world!"
 
 
-def test_linebreak_without_continuation_fails():
-    json_string = """'Hello 
-world!'"""
-    with pytest.raises(JSON5DecodeError) as exc_info:
-        loads(json_string)
-    assert "Illegal" in str(exc_info.value)
-
-
 def test_number_literals_inf_nan():
     json_string = """{
     "positiveInfinity": Infinity,

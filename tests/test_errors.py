@@ -67,3 +67,23 @@ def test_multiple_errors_all_surface_at_once():
     with pytest.raises(JSON5DecodeError) as exc_info:
         loads(json_string)
     assert str(exc_info.value).count('Syntax Error') == 2
+
+
+def test_linebreak_without_continuation_fails():
+    json_string = """'Hello \nworld!'"""
+    with pytest.raises(JSON5DecodeError) as exc_info:
+        loads(json_string)
+    assert "Illegal" in str(exc_info.value)
+
+
+def test_linebreak_without_continuation_fails_double():
+    json_string = '''"Hello \nworld!"'''
+    with pytest.raises(JSON5DecodeError) as exc_info:
+        loads(json_string)
+    assert "Illegal" in str(exc_info.value)
+
+
+def test_empty_input_raises_error():
+    with pytest.raises(JSON5DecodeError) as exc_info:
+        loads("")
+    assert "unexpected EOF" in str(exc_info.value)
