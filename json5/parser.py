@@ -75,23 +75,15 @@ class JSONParser(Parser):
     def whitespace_andor_comment(self, p):
         return p[0]
 
-    @_('[ WHITESPACE ] BLOCK_COMMENT [ WHITESPACE ]')
+    @_('BLOCK_COMMENT')
     def comment(self, p):
-        node = BlockComment(p[1])
-        if p.WHITESPACE0:
-            node.wsc_before.append(p.WHITESPACE0)
-        if p.WHITESPACE1:
-            node.wsc_after.append(p.WHITESPACE1)
-        return node
+        return p[0]
 
-    @_('[ WHITESPACE ] LINE_COMMENT [ WHITESPACE ]')
+
+    @_('LINE_COMMENT')
     def comment(self, p):
-        node = LineComment(p[1])
-        if p.WHITESPACE0:
-            node.wsc_before.append(p.WHITESPACE0)
-        if p.WHITESPACE1:
-            node.wsc_after.append(p.WHITESPACE1)
-        return node
+        return p[0]
+
 
 
     @_('first_key_value_pair { subsequent_key_value_pair }')
@@ -105,12 +97,18 @@ class JSONParser(Parser):
 
 
 
-    @_('LBRACE [ key_value_pairs ] RBRACE')
+    @_('LBRACE { whitespace_andor_comment } [ key_value_pairs ] RBRACE')
     def json_object(self, p):
         if not p.key_value_pairs:
-            return JSONObject()
-        kvps, trailing_comma = p.key_value_pairs
-        return JSONObject(*kvps, trailing_comma=trailing_comma)
+            node = JSONObject()
+        else:
+            kvps, trailing_comma = p.key_value_pairs
+            node = JSONObject(*kvps, trailing_comma=trailing_comma)
+
+        for wsc in p.whitespace_andor_comment:
+            node.leading_wsc.append(wsc)
+
+        return node
 
     @_('value')
     def first_array_value(self, p):
@@ -139,14 +137,18 @@ class JSONParser(Parser):
         return ret, None
 
 
-    @_('LBRACKET [ array_values ] RBRACKET')
+    @_('LBRACKET { whitespace_andor_comment } [ array_values ] RBRACKET')
     def json_array(self, p):
         if not p.array_values:
-            return JSONArray()
-        values, trailing_comma = p.array_values
-        return JSONArray(*values, trailing_comma=trailing_comma)
+            node = JSONArray()
+        else:
+            values, trailing_comma = p.array_values
+            node = JSONArray(*values, trailing_comma=trailing_comma)
 
+        for wsc in p.whitespace_andor_comment:
+            node.leading_wsc.append(wsc)
 
+        return node
 
     @_('NAME')
     def identifier(self, p):

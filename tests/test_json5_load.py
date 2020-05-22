@@ -56,6 +56,20 @@ def test_object_with_multiline_comment():
     }"""
     assert loads(json_string) == {"foo": "bar"}
 
+def test_array_load_with_line_comment():
+    json_string = """[ // line comment
+    "foo", "bar"
+    ]"""
+    assert loads(json_string) == ["foo", "bar"]
+
+
+def test_array_with_multiline_comment():
+    json_string = """[ /* foo bar
+    */ "foo", "bar"
+    ]"""
+    assert loads(json_string) == ["foo", "bar"]
+
+
 
 def test_nested_object():
     json_string = """{"foo": {"bacon": "eggs"}}"""
@@ -238,3 +252,21 @@ def test_unary_plus_load():
 def test_load_from_file():
     f = StringIO('{foo: 123}')
     assert load(f) == {'foo': 123}
+
+
+def test_load_empty_array_with_whitespace():
+    json_string = "{   }"
+    assert loads(json_string) == {}
+
+
+def test_load_empty_object_wtih_whitespace():
+    json_string = "[   ]"
+    assert loads(json_string) == []
+
+def test_load_empty_object_with_comments():
+    json_string = "{ // foo \n}"
+    assert loads(json_string) == {}
+
+def test_load_empty_array_with_comments():
+    json_string = "[ // foo \n]"
+    assert loads(json_string) == []
