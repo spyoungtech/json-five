@@ -61,3 +61,9 @@ def test_model_dumper_raises_error_for_unknown_node():
     with pytest.raises(NotImplementedError):
         ModelDumper().dump(f)
 
+def test_multiple_errors_all_surface_at_once():
+    json_string = """[\n"foo",\n"bar"\n"baz",\n"bacon"\n"eggs"]"""
+    # 2 errors due to missing comma  ^                ^
+    with pytest.raises(JSON5DecodeError) as exc_info:
+        loads(json_string)
+    assert str(exc_info.value).count('Syntax Error') == 2
