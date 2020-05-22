@@ -5,6 +5,8 @@ from json5.loader import loads, JsonIdentifier, load
 from sly.lex import LexError
 from io import StringIO
 
+from json5.utils import JSON5DecodeError
+
 
 def test_object_string_key_value_pair():
     json_string = """{"foo":"bar"}"""
@@ -134,10 +136,10 @@ def test_line_continuations_alternate_terminators(terminator):
 
 def test_linebreak_without_continuation_fails():
     json_string = """'Hello 
-world!"""
-    with pytest.raises(LexError) as exc_info:
+world!'"""
+    with pytest.raises(JSON5DecodeError) as exc_info:
         loads(json_string)
-    assert "Illegal character" in str(exc_info.value)
+    assert "Illegal" in str(exc_info.value)
 
 
 def test_number_literals_inf_nan():

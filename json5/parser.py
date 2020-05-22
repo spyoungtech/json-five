@@ -214,6 +214,9 @@ class JSONParser(Parser):
     def double_quoted_string(self, p):
         raw_value = p[0]
         contents = raw_value[1:-1]
+        if re.search(r'(?<!\\)([\u000D\u2028\u2029]|(?<!\r)\n)', contents):
+            errmsg = f"Illegal line terminator without continuation in string at line {p.lineno}"
+            self.errors.append(JSON5DecodeError(errmsg, None))
         contents = re.sub(r'\\(\r\n|[\u000A\u000D\u2028\u2029])', '', contents)
         contents = re.sub(r'\\(.)', replace_escape_literals, contents)
         return DoubleQuotedString(contents, raw_value=raw_value)
@@ -222,6 +225,9 @@ class JSONParser(Parser):
     def single_quoted_string(self, p):
         raw_value = p[0]
         contents = raw_value[1:-1]
+        if re.search(r'(?<!\\)([\u000D\u2028\u2029]|(?<!\r)\n)', contents):
+            errmsg = f"Illegal line terminator without continuation in string at line {p.lineno}"
+            self.errors.append(JSON5DecodeError(errmsg, None))
         contents = re.sub(r'\\(\r\n|[\u000A\u000D\u2028\u2029])', '', contents)
         contents = re.sub(r'\\(.)', replace_escape_literals, contents)
         return SingleQuotedString(contents, raw_value=raw_value)

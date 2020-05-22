@@ -3,6 +3,8 @@ from json5.dumper import DefaultDumper, ModelDumper, modelize
 from json5.model import LineComment
 import pytest
 
+from json5.utils import JSON5DecodeError
+
 
 def test_loading_comment_raises_runtime_error_default_loader():
     model = LineComment('// foo')
@@ -20,7 +22,7 @@ def test_loading_unknown_node_raises_error():
 
 def test_reserved_keywords_raise_error():
     json_string = """{break: "not good!"}"""
-    with pytest.raises(SyntaxError):
+    with pytest.raises(JSON5DecodeError):
         loads(json_string)
 
 
