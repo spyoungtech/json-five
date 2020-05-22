@@ -10,12 +10,10 @@ from json5.utils import JSON5DecodeError
 
 
 class QuietSlyLogger(SlyLogger):
-    def debug(self, *args, **kwargs):
-        return
-    info = debug
-
     def warning(self, *args, **kwargs):
         return
+    debug = warning
+    info = warning
 
 
 ESCAPE_SEQUENCES = {
