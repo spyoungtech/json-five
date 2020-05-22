@@ -77,12 +77,12 @@ class JSONParser(Parser):
 
     @_('BLOCK_COMMENT')
     def comment(self, p):
-        return p[0]
+        return BlockComment(p[0])
 
 
     @_('LINE_COMMENT')
     def comment(self, p):
-        return p[0]
+        return LineComment(p[0])
 
 
 
