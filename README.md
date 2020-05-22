@@ -14,7 +14,7 @@ JSON5 for Python
 pip install json-five
 ```
 
-This project has just one requirement: the [`sly`](https://github.com/dabeaz/sly) package.
+This project requires Python 3.6 or newer.
 
 ## Usage
 
@@ -34,48 +34,15 @@ comment that can span lines /*
 
 See also the [full documentation](https://json-five.readthedocs.io/en/latest/)
 
-## Project goals
+## Key features
 
-- support a similar interface to the `json` module with support for JSON5 sources
-- support round-trip preservation of comments
+- Supports the JSON5 spec
+- Supports similar interfaces to stdlib `json` module
+- Supports round-trip preservation of comments
+- Tries to find _all_ syntax errors at once (instead of raising on the first error encountered)
 
-## Status/milestones
 
-This project is in very early stages of development. The following are some 
-milestones that hopefully will be able to be marked as done as development progresses.
+## Status
 
-- [x] parse json5 to Python (ignoring comments)
-  - [x] line comments
-  - [x] block comments
-  - [x] numeric literals
-  - [x] trailing commas for arrays and objects
-  - [x] line continuations
-  - [x] ecma identifiers as object keys
-  - [x] leading plus for numbers
-  - [x] single quoted strings
-  - [x] escape characters in strings
-- [x] dump python to JSON (no comment support)
-  - [x] indent style (that matches `json`)
-  - [ ] style options (quotes, trailing commas, etc)
-  - [ ] helper classes for dumping types as other literals (hexadecimal numbers, identifiers, etc)
-  - [x] load/loads to support similar options to `json` (e.g. `object_hook`, `parse_x`, etc)
-  - [ ] dump/dumps to support similar options to `json` module (e.g. hooks, `ensure_ascii`, etc)
-  - [ ] string escapes according to quote style
-- [x] support manipulation of json model (e.g. to add/edit comments)
-- [x] dump json model with comments
-- [x] preserve comments when loading json5 (round-trip support)
-- [ ] Transparent model modification with Python datatype-like objects with methods for modifying comments
-
-...
-
-- [ ] Optimize with a C/Cython version
-
-## How fast is it?
-
-It's nowhere close to the C-optimized `json` stdlib module. We may get closer to that 
-benchmark if/when we rewrite parts with Cython.
-
-In my own limited testing, as of v0.0.2, this module is about 10-450x slower than the stdlib C-optimized `json` 
-and about 10-50x slower than the stdlib pure python version of `json`.
-
-I expect this to slow down marginally when round-trip comment preservation is implemented.
+This project is still in early stages of development. Check the [issues](https://github.com/spyoungtech/json-five/issues) 
+page to see known bugs and unimplemented features.
