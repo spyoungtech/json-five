@@ -12,8 +12,8 @@ for root,dirs,files in os.walk(tests_path):
     for f in files:
         if f.endswith('.json5') or f.endswith('.json'):
             specs.append(os.path.join(root, f))
-        elif f.endswith('.txt'):
-            error_spec = f.replace('.txt', '.errorSpec')
+        elif f.endswith('.txt') or f.endswith('.js'):
+            error_spec = f.replace('.txt', '.errorSpec').replace('.js', '.errorSpec')
             error_specs.append((os.path.join(root, f), os.path.join(root, error_spec)))
 
 @pytest.mark.parametrize('fp', specs)
