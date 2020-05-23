@@ -18,6 +18,9 @@ for root,dirs,files in os.walk(tests_path):
 
 @pytest.mark.parametrize('fp', specs)
 def test_official_files(fp):
+    if not os.path.exists(tests_path):
+        pytest.mark.skip("Tests repo was not present in expected location. Skipping.")
+        return
     try:
         load(open(fp, encoding='utf-8'))
     except JSON5DecodeError:
@@ -28,6 +31,9 @@ def test_official_files(fp):
 
 @pytest.mark.parametrize(('input_file', 'expected'), error_specs)
 def test_official_error_specs(input_file, expected):
+    if not os.path.exists(tests_path):
+        pytest.mark.skip("Tests repo was not present in expected location. Skipping.")
+        return
     if 'octal' in input_file:
         pytest.mark.xfail("Octals are dumb")
         return
