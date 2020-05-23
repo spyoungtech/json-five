@@ -98,3 +98,13 @@ def test_null_escape_may_not_be_followed_by_decimal_digit():
     with pytest.raises(JSON5DecodeError) as exc_info:
         loads(r"'\01'")
     assert "'\\0' MUST NOT be followed by a decimal digit" in str(exc_info.value)
+
+def test_backslash_x_without_two_hexadecimals_raises_error_but_for_double_quotes():
+    with pytest.raises(JSON5DecodeError) as exc_info:
+        loads(r'"\x1"')
+    assert "'\\x' MUST be followed by two hexadecimal digits" in str(exc_info.value)
+
+def test_null_escape_may_not_be_followed_by_decimal_digit_but_for_double_quotes():
+    with pytest.raises(JSON5DecodeError) as exc_info:
+        loads(r'"\01"')
+    assert "'\\0' MUST NOT be followed by a decimal digit" in str(exc_info.value)
