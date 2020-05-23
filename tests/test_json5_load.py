@@ -270,3 +270,16 @@ def test_load_empty_object_with_comments():
 def test_load_empty_array_with_comments():
     json_string = "[ // foo \n]"
     assert loads(json_string) == []
+
+def test_load_array_with_comment_before_additional_element():
+    json_string = "['foo',/* comment */ 'bar', // foo\n'baz']"
+    assert loads(json_string) == ['foo', 'bar', 'baz']
+
+def test_load_object_with_additional_comments():
+    json_string = """{
+    "foo": /* comment */ "bar",
+    // another comment
+    bacon /* breakfast */: "eggs" // better than spam
+    }
+    """
+    assert loads(json_string) == {'foo': 'bar', 'bacon': 'eggs'}
