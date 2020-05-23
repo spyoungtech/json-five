@@ -7,7 +7,8 @@ from sly.yacc import SlyLogger
 from json5.tokenizer import JSONLexer, tokenize
 from json5.model import *
 from json5.utils import JSON5DecodeError
-
+import ast
+from functools import lru_cache
 
 class QuietSlyLogger(SlyLogger):
     def warning(self, *args, **kwargs):
@@ -32,10 +33,27 @@ ESCAPE_SEQUENCES = {
 # class TrailingComma:
 #     pass
 
-
 def replace_escape_literals(matchobj):
+    s = matchobj.group(0)
+    if s.startswith('\\0') and len(s) == 3:
+        raise JSON5DecodeError("'\\0' MUST NOT be followed by a decimal digit", None)
     seq = matchobj.group(1)
     return ESCAPE_SEQUENCES.get(seq, seq)
+
+
+@lru_cache(maxsize=1024)
+def _latin_escape_replace(s):
+    if len(s) != 4:
+        raise JSON5DecodeError("'\\x' MUST be followed by two hexadecimal digits", None)
+    val = ast.literal_eval(f'"{s}"')
+    if val == '\\':
+        val = '\\\\'  # this is important; the subsequent regex will sub it back to \\
+    return val
+
+
+def latin_escape_replace(matchobj):
+    s = matchobj.group(0)
+    return _latin_escape_replace(s)
 
 
 class JSONParser(Parser):
@@ -218,7 +236,14 @@ class JSONParser(Parser):
             errmsg = f"Illegal line terminator without continuation"
             self.errors.append(JSON5DecodeError(errmsg, p._slice[0]))
         contents = re.sub(r'\\(\r\n|[\u000A\u000D\u2028\u2029])', '', contents)
-        contents = re.sub(r'\\(.)', replace_escape_literals, contents)
+        try:
+            contents = re.sub(r'\\x[a-fA-F0-9]{0,2}', latin_escape_replace, contents)
+        except JSON5DecodeError as exc:
+            self.errors.append(JSON5DecodeError(exc.args[0], p._slice[0]))
+        try:
+            contents = re.sub(r'\\(0\d|.)', replace_escape_literals, contents)
+        except JSON5DecodeError as exc:
+            self.errors.append(JSON5DecodeError(exc.args[0], p._slice[0]))
         return DoubleQuotedString(contents, raw_value=raw_value)
 
     @_("SINGLE_QUOTE_STRING")
@@ -229,7 +254,14 @@ class JSONParser(Parser):
             errmsg = f"Illegal line terminator without continuation"
             self.errors.append(JSON5DecodeError(errmsg, p._slice[0]))
         contents = re.sub(r'\\(\r\n|[\u000A\u000D\u2028\u2029])', '', contents)
-        contents = re.sub(r'\\(.)', replace_escape_literals, contents)
+        try:
+            contents = re.sub(r'\\x[a-fA-F0-9]{0,2}', latin_escape_replace, contents)
+        except JSON5DecodeError as exc:
+            self.errors.append(JSON5DecodeError(exc.args[0], p._slice[0]))
+        try:
+            contents = re.sub(r'\\(0\d|.)', replace_escape_literals, contents)
+        except JSON5DecodeError as exc:
+            self.errors.append(JSON5DecodeError(exc.args[0], p._slice[0]))
         return SingleQuotedString(contents, raw_value=raw_value)
 
     @_('double_quoted_string',

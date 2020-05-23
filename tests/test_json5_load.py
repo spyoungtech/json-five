@@ -283,3 +283,11 @@ def test_load_object_with_additional_comments():
     }
     """
     assert loads(json_string) == {'foo': 'bar', 'bacon': 'eggs'}
+
+
+def test_load_latin_escape():
+    json_string = r'"\x5C"'
+    assert loads(json_string) == '\\'
+
+def test_latin_escape_backslash_is_not_real_backslack():
+    assert loads("""'\\x5C01'""") == "\\01"

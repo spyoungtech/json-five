@@ -76,7 +76,7 @@ class JSONLexer(Lexer):
     MINUS = r'\-'
     PLUS = r'\+'
     EXPONENT = r"(e|E)(\-|\+)?\d+"
-    HEXADECIMAL = r'0x[0-9a-fA-F]+'
+    HEXADECIMAL = r'0(x|X)[0-9a-fA-F]+'
     FLOAT = r'(\d+\.\d*)|(\d*\.\d+)'      # 23.45
     INTEGER = r'\d+'
     NAME = r'[a-zA-Z_\$]([a-zA-Z_\d\$])*'
