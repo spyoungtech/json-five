@@ -149,7 +149,6 @@ class ModelDumper:
         #  any provided environment is ignored
         self.env = Environment()
 
-
     def process_wsc_before(self, node):
         for wsc in node.wsc_before:
             if isinstance(wsc, Comment):
@@ -166,8 +165,16 @@ class ModelDumper:
             elif isinstance(wsc, str):
                 self.env.write(wsc)
             else:
-                raise ValueError(f"Did not expect {type(node)}")
+                raise ValueError(f"Did not expect {type(wsc)}")
 
+    def process_leading_wsc(self, node):
+        for wsc in node.leading_wsc:
+            if isinstance(wsc, Comment):
+                self.dump(wsc)
+            elif isinstance(wsc, str):
+                self.env.write(wsc)
+            else:
+                raise ValueError(f"Did not expect {type(wsc)}")
 
     @singledispatchmethod
     def dump(self, node):
@@ -185,6 +192,8 @@ class ModelDumper:
     def json_object_to_json(self, node):
         self.process_wsc_before(node)
         self.env.write('{')
+        if node.leading_wsc:
+            self.process_leading_wsc(node)
         num_pairs = len(node.key_value_pairs)
         for index, kvp in enumerate(node.key_value_pairs, start=1):
             self.dump(kvp.key)
@@ -201,6 +210,8 @@ class ModelDumper:
     def json_array_to_json(self, node):
         self.process_wsc_before(node)
         self.env.write('[')
+        if node.leading_wsc:
+            self.process_leading_wsc(node)
         for index, value in enumerate(node.values, start=1):
             self.dump(value)
             if index != len(node.values):

@@ -47,6 +47,20 @@ def test_object_with_multiline_comment():
     assert dumps(loads(json_string, loader=ModelLoader()), dumper=ModelDumper()) == json_string
 
 
+def test_array_load_with_line_comment():
+    json_string = """[ // line comment
+    "foo", "bar"
+    ]"""
+    assert dumps(loads(json_string, loader=ModelLoader()), dumper=ModelDumper()) == json_string
+
+
+def test_array_with_multiline_comment():
+    json_string = """[ /* foo bar
+    */ "foo", "bar"
+    ]"""
+    assert dumps(loads(json_string, loader=ModelLoader()), dumper=ModelDumper()) == json_string
+
+
 def test_nested_object():
     json_string = """{"foo": {"bacon": "eggs"}}"""
     assert dumps(loads(json_string, loader=ModelLoader()), dumper=ModelDumper()) == json_string
@@ -119,4 +133,23 @@ def test_hexadecimal_load():
     {
     positiveHex: 0xdecaf,
     negativeHex: -0xC0FFEE,}"""
+    assert dumps(loads(json_string, loader=ModelLoader()), dumper=ModelDumper()) == json_string
+
+def test_load_empty_array_with_whitespace():
+    json_string = "{   }"
+    assert dumps(loads(json_string, loader=ModelLoader()), dumper=ModelDumper()) == json_string
+
+
+def test_load_empty_object_wtih_whitespace():
+    json_string = "[   ]"
+    assert dumps(loads(json_string, loader=ModelLoader()), dumper=ModelDumper()) == json_string
+
+
+def test_load_empty_object_with_comments():
+    json_string = "{ // foo \n}"
+    assert dumps(loads(json_string, loader=ModelLoader()), dumper=ModelDumper()) == json_string
+
+
+def test_load_empty_array_with_comments():
+    json_string = "[ // foo \n]"
     assert dumps(loads(json_string, loader=ModelLoader()), dumper=ModelDumper()) == json_string

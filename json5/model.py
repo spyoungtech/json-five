@@ -6,7 +6,7 @@ from decimal import Decimal
 
 
 class Node(SimpleNamespace):
-    excluded_names = ['excluded_names', 'wsc_before', 'wsc_after']
+    excluded_names = ['excluded_names', 'wsc_before', 'wsc_after', 'leading_wsc']
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Whitespace/Comments before/after the node
@@ -39,19 +39,21 @@ class Key(Node):
 
 
 class JSONObject(Value):
-    def __init__(self, *key_value_pairs, trailing_comma=None):
+    def __init__(self, *key_value_pairs, trailing_comma=None, leading_wsc=None):
         key_value_pairs = list(key_value_pairs)
         for kvp in key_value_pairs:
             assert isinstance(kvp, KeyValuePair), f"Expected key value pair, got {type(kvp)}"
-        super().__init__(key_value_pairs=key_value_pairs, trailing_comma=trailing_comma)
+        assert leading_wsc is None or all(isinstance(item, str) or isinstance(item, Comment) for item in leading_wsc)
+        super().__init__(key_value_pairs=key_value_pairs, trailing_comma=trailing_comma, leading_wsc=leading_wsc or [])
 
 
 class JSONArray(Value):
-    def __init__(self, *values, trailing_comma=None):
+    def __init__(self, *values, trailing_comma=None, leading_wsc=None):
         values = list(values)
         for value in values:
             assert isinstance(value, Value), f"Was expecting object with type Value. Got {type(value)}"
-        super().__init__(values=values, trailing_comma=trailing_comma)
+        assert leading_wsc is None or all(isinstance(item, str) or isinstance(item, Comment) for item in leading_wsc)
+        super().__init__(values=values, trailing_comma=trailing_comma, leading_wsc=leading_wsc or [])
 
 
 class KeyValuePair(Node):

@@ -48,50 +48,55 @@ class JSONParser(Parser):
         self.errors = []
 
 
-    @_('value')
+    @_('{ wsc } value { wsc }')
     def text(self, p):
-        return JSONText(value=p[0])
+        node = JSONText(value=p[1])
+        for wsc in p.wsc0:
+            node.wsc_before.append(wsc)
+        for wsc in p.wsc1:
+            node.wsc_after.append(wsc)
+        return node
 
-
-    @_('key COLON value')
+    @_('key { wsc } COLON { wsc } value { wsc }')
     def first_key_value_pair(self, p):
+        key = p[0]
+        for wsc in p.wsc0:
+            key.wsc_after.append(wsc)
+        value = p[4]
+        for wsc in p.wsc1:
+            value.wsc_before.append(wsc)
+        for wsc in p.wsc2:
+            value.wsc_after.append(wsc)
         return KeyValuePair(key=p.key, value=p.value)
 
-    @_('COMMA { whitespace_andor_comment } [ key COLON value ]')
+
+    @_('COMMA { wsc } [ first_key_value_pair ]')
     def subsequent_key_value_pair(self, p):
-        if p.key and p.value:
-            for wsc in p.whitespace_andor_comment:
-                p.key.wsc_before.append(wsc)
-            return KeyValuePair(key=p.key, value=p.value)
+        if p.first_key_value_pair:
+            node = p.first_key_value_pair
+            for wsc in p.wsc:
+                node.key.wsc_before.append(wsc)
         else:
             node = TrailingComma()
-            for wsc in p.whitespace_andor_comment:
+            for wsc in p.wsc:
                 node.wsc_after.append(wsc)
-            return node
+        return node
 
 
     @_('WHITESPACE',
        'comment')
-    def whitespace_andor_comment(self, p):
+    def wsc(self, p):
         return p[0]
 
-    @_('[ WHITESPACE ] BLOCK_COMMENT [ WHITESPACE ]')
+    @_('BLOCK_COMMENT')
     def comment(self, p):
-        node = BlockComment(p[1])
-        if p.WHITESPACE0:
-            node.wsc_before.append(p.WHITESPACE0)
-        if p.WHITESPACE1:
-            node.wsc_after.append(p.WHITESPACE1)
-        return node
+        return BlockComment(p[0])
 
-    @_('[ WHITESPACE ] LINE_COMMENT [ WHITESPACE ]')
+
+    @_('LINE_COMMENT')
     def comment(self, p):
-        node = LineComment(p[1])
-        if p.WHITESPACE0:
-            node.wsc_before.append(p.WHITESPACE0)
-        if p.WHITESPACE1:
-            node.wsc_after.append(p.WHITESPACE1)
-        return node
+        return LineComment(p[0])
+
 
 
     @_('first_key_value_pair { subsequent_key_value_pair }')
@@ -105,28 +110,33 @@ class JSONParser(Parser):
 
 
 
-    @_('LBRACE [ key_value_pairs ] RBRACE')
+    @_('LBRACE { wsc } [ key_value_pairs ] RBRACE')
     def json_object(self, p):
         if not p.key_value_pairs:
-            return JSONObject()
-        kvps, trailing_comma = p.key_value_pairs
-        return JSONObject(*kvps, trailing_comma=trailing_comma)
+            node = JSONObject(leading_wsc=list(p.wsc or []))
+        else:
+            kvps, trailing_comma = p.key_value_pairs
+            node = JSONObject(*kvps, trailing_comma=trailing_comma, leading_wsc=list(p.wsc or []))
 
-    @_('value')
+        return node
+
+    @_('value { wsc }')
     def first_array_value(self, p):
-        return p[0]
+        node = p[0]
+        for wsc in p.wsc:
+            node.wsc_after.append(wsc)
+        return node
 
-    @_('COMMA { whitespace_andor_comment } [ value ]')
+    @_('COMMA { wsc } [ first_array_value ]')
     def subsequent_array_value(self, p):
-        if p.value:
-            node = p.value
-            for wsc in p.whitespace_andor_comment:
-                node.wsc_before.append(wsc)  # Wouldn't the value already take care of this? reduce...reduce....
+        if p.first_array_value:
+            node = p.first_array_value
+            for wsc in p.wsc:
+                node.wsc_before.append(wsc)
         else:
             node = TrailingComma()
-            for wsc in p.whitespace_andor_comment:
+            for wsc in p.wsc:
                 node.wsc_after.append(wsc)
-
         return node
 
     @_('first_array_value { subsequent_array_value }')
@@ -139,27 +149,27 @@ class JSONParser(Parser):
         return ret, None
 
 
-    @_('LBRACKET [ array_values ] RBRACKET')
+    @_('LBRACKET { wsc } [ array_values ] RBRACKET')
     def json_array(self, p):
         if not p.array_values:
-            return JSONArray()
-        values, trailing_comma = p.array_values
-        return JSONArray(*values, trailing_comma=trailing_comma)
+            node = JSONArray()
+        else:
+            values, trailing_comma = p.array_values
+            node = JSONArray(*values, trailing_comma=trailing_comma)
 
+        for wsc in p.wsc:
+            node.leading_wsc.append(wsc)
 
+        return node
 
     @_('NAME')
     def identifier(self, p):
         return Identifier(name=p[0])
 
-    @_('{ whitespace_andor_comment } identifier { whitespace_andor_comment }',
-       '{ whitespace_andor_comment } string { whitespace_andor_comment }')
+    @_('identifier',
+       'string')
     def key(self, p):
-        node = p[1]
-        for wsc in p.whitespace_andor_comment0:
-            node.wsc_before.append(wsc)
-        for wsc in p.whitespace_andor_comment1:
-            node.wsc_after.append(wsc)
+        node = p[0]
         return node
 
     @_('INTEGER')
@@ -178,24 +188,16 @@ class JSONParser(Parser):
     def number(self, p):
         return NaN()
 
-    @_('{ whitespace_andor_comment } MINUS number { whitespace_andor_comment }')
+    @_('MINUS number')
     def value(self, p):
         if isinstance(p.number, Infinity):
             p.number.negative = True
         node = UnaryOp(op='-', value=p.number)
-        for wsc in p.whitespace_andor_comment0:
-            node.wsc_before.append(wsc)
-        for wsc in p.whitespace_andor_comment1:
-            node.wsc_after.append(wsc)
         return node
 
-    @_('{ whitespace_andor_comment } PLUS number { whitespace_andor_comment }')
+    @_('PLUS number')
     def value(self, p):
         node = UnaryOp(op='+', value=p.number)
-        for wsc in p.whitespace_andor_comment0:
-            node.wsc_before.append(wsc)
-        for wsc in p.whitespace_andor_comment1:
-            node.wsc_after.append(wsc)
         return node
 
     @_('INTEGER EXPONENT',
@@ -247,18 +249,14 @@ class JSONParser(Parser):
     def null(self, p):
         return NullLiteral()
 
-    @_('{ whitespace_andor_comment } string { whitespace_andor_comment }',
-       '{ whitespace_andor_comment } json_object { whitespace_andor_comment }',
-       '{ whitespace_andor_comment } json_array { whitespace_andor_comment }',
-       '{ whitespace_andor_comment } boolean { whitespace_andor_comment }',
-       '{ whitespace_andor_comment } null { whitespace_andor_comment }',
-       '{ whitespace_andor_comment } number { whitespace_andor_comment }',)
+    @_('string',
+       'json_object',
+       'json_array',
+       'boolean',
+       'null',
+       'number',)
     def value(self, p):
-        node = p[1]
-        for wsc in p.whitespace_andor_comment0:
-            node.wsc_before.append(wsc)
-        for wsc in p.whitespace_andor_comment1:
-            node.wsc_after.append(wsc)
+        node = p[0]
         return node
 
     @_('BREAK',

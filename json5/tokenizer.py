@@ -63,8 +63,6 @@ class JSONLexer(Lexer):
     SINGLE_QUOTE_STRING = r"'(?:[^'\\]|\\.)*'"
 
     LINE_COMMENT = r"//[^\n]*"
-    _BLOCK_COMMENT_START = r"\/\*"
-    _BLOCK_COMMENT_END = r"\*\/"
     @_(r'/\*((.|\n))*?\*/')
     def BLOCK_COMMENT(self, tok):
         self.lineno += tok.value.count('\n')
