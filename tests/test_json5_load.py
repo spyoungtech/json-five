@@ -283,3 +283,8 @@ def test_load_object_with_additional_comments():
     }
     """
     assert loads(json_string) == {'foo': 'bar', 'bacon': 'eggs'}
+
+
+def test_load_latin_escape():
+    json_string = r'"\x5C"'
+    assert loads(json_string) == '\\'
