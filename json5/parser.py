@@ -34,7 +34,8 @@ ESCAPE_SEQUENCES = {
 #     pass
 
 def replace_escape_literals(matchobj):
-    if matchobj.string.startswith('\\0') and len(matchobj.string) == 3:
+    s = matchobj.group(0)
+    if s.startswith('\\0') and len(s) == 3:
         raise JSON5DecodeError("'\\0' MUST NOT be followed by a decimal digit", None)
     seq = matchobj.group(1)
     return ESCAPE_SEQUENCES.get(seq, seq)
@@ -44,11 +45,14 @@ def replace_escape_literals(matchobj):
 def _latin_escape_replace(s):
     if len(s) != 4:
         raise JSON5DecodeError("'\\x' MUST be followed by two hexadecimal digits", None)
-    return ast.literal_eval(f'"{s}"')
+    val = ast.literal_eval(f'"{s}"')
+    if val == '\\':
+        val = '\\\\'  # this is important; the subsequent regex will sub it back to \\
+    return val
 
 
 def latin_escape_replace(matchobj):
-    s = matchobj.string
+    s = matchobj.group(0)
     return _latin_escape_replace(s)
 
 
