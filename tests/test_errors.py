@@ -2,6 +2,7 @@ from json5.loader import loads, ModelLoader, DefaultLoader
 from json5.dumper import DefaultDumper, ModelDumper, modelize
 from json5.model import LineComment, Integer
 import pytest
+import re
 
 from json5.utils import JSON5DecodeError
 
@@ -112,3 +113,27 @@ def test_invalid_identifier_via_escape_sequence():
     with pytest.raises(JSON5DecodeError) as exc_info:
         loads(json_string)
     assert "Invalid identifier name" in str(exc_info.value)
+
+@pytest.mark.parametrize('json_string', [""""foo \\\nbar baz \\\nbacon \neggs\"""", """'foo \\\nbar baz \\\nbacon \neggs'"""])
+def test_illegal_line_terminator_error_message(json_string):
+
+    with pytest.raises(JSON5DecodeError) as exc_info:
+        loads(json_string)
+
+    exc_message = str(exc_info.value)
+    exc_lineno_match = re.search('line (\d+)', exc_message)
+    if exc_lineno_match:
+        exc_lineno = int(exc_lineno_match.groups()[0])
+    else:
+        exc_lineno = None
+    exc_col_match = re.search('column (\d+)', exc_message)
+    if exc_col_match:
+        exc_col = int(exc_col_match.groups()[0])
+    else:
+        exc_col = None
+    exc_index_match = re.search('char (\d+)', exc_message)
+    if exc_index_match:
+        exc_index = int(exc_index_match.groups()[0])
+    else:
+        exc_index = None
+    assert (3, 7, 23) == (exc_lineno, exc_col, exc_index)
