@@ -137,3 +137,15 @@ def test_illegal_line_terminator_error_message(json_string):
     else:
         exc_index = None
     assert (3, 7, 23) == (exc_lineno, exc_col, exc_index)
+
+def test_octals_are_rejected_by_default():
+    json_string = "0123"
+    with pytest.raises(JSON5DecodeError) as exc_info:
+        loads(json_string)
+    assert "Invalid integer literal" in str(exc_info.value)
+
+def test_malformed_octals_result_in_additional_error():
+    json_string = "058"
+    with pytest.raises(JSON5DecodeError) as exc_info:
+        loads(json_string)
+    assert "Invalid octal format" in str(exc_info.value)
