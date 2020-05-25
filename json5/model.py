@@ -84,9 +84,20 @@ class Number(Value):
 
 
 class Integer(Number):
-    def __init__(self, raw_value, is_hex=False):
-        value = int(raw_value) if not is_hex else int(raw_value, 0)
-        super().__init__(raw_value=raw_value, value=value, is_hex=is_hex)
+    def __init__(self, raw_value, is_hex=False, is_octal=False):
+        assert isinstance(raw_value, str)
+        if is_hex and is_octal:
+            raise ValueError("is_hex and is_octal are mutually exclusive")
+        if is_hex:
+            value = int(raw_value, 0)
+        elif is_octal:
+            if raw_value.startswith('0o'):
+                value = int(raw_value, 8)
+            else:
+                value = int(raw_value.replace('0', '0o', 1), 8)
+        else:
+            value = int(raw_value)
+        super().__init__(raw_value=raw_value, value=value, is_hex=is_hex, is_octal=is_octal)
 
 
 class Float(Number):
