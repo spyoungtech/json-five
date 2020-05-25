@@ -37,9 +37,6 @@ class JSONLexer(Lexer):
               TRUE, FALSE, NULL,
               COLON,
 
-              # RESERVED KEYWORDS
-              BREAK, DO, INSTANCEOF, TYPEOF, CASE, ELSE, NEW, VAR, CATCH, FINALLY, RETURN, VOID, CONTINUE, FOR, SWITCH, WHILE, DEBUGGER, FUNCTION, THIS, WITH, DEFAULT, IF, THROW, DELETE, IN, TRY,
-
               # Numbers
               PLUS, MINUS,
               FLOAT, INTEGER,
@@ -86,34 +83,6 @@ class JSONLexer(Lexer):
     NAME['null'] = NULL
     NAME['Infinity'] = INFINITY
     NAME['NaN'] = NAN
-
-    # RESERVED KEYWORDS
-    NAME['break'] = BREAK
-    NAME['do'] = DO
-    NAME['instanceof'] = INSTANCEOF
-    NAME['typeof'] = TYPEOF
-    NAME['case'] = CASE
-    NAME['else'] = ELSE
-    NAME['new'] = NEW
-    NAME['var'] = VAR
-    NAME['catch'] = CATCH
-    NAME['finally'] = FINALLY
-    NAME['return'] = RETURN
-    NAME['void'] = VOID
-    NAME['continue'] = CONTINUE
-    NAME['for'] = FOR
-    NAME['switch'] = SWITCH
-    NAME['while'] = WHILE
-    NAME['debugger'] = DEBUGGER
-    NAME['function'] = FUNCTION
-    NAME['this'] = THIS
-    NAME['with'] = WITH
-    NAME['default'] = DEFAULT
-    NAME['if'] = IF
-    NAME['throw'] = THROW
-    NAME['delete'] = DELETE
-    NAME['in'] = IN
-    NAME['try'] = TRY
 
     def error(self, t):
         raise JSON5DecodeError(f'Illegal character {t.value[0]!r} at index {self.index}', None)

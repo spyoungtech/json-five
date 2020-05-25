@@ -291,37 +291,6 @@ class JSONParser(Parser):
         node = p[0]
         return node
 
-    @_('BREAK',
-    'DO',
-    'INSTANCEOF',
-    'TYPEOF',
-    'CASE',
-    'ELSE',
-    'NEW',
-    'VAR',
-    'CATCH',
-    'FINALLY',
-    'RETURN',
-    'VOID',
-    'CONTINUE',
-    'FOR',
-    'SWITCH',
-    'WHILE',
-    'DEBUGGER',
-    'FUNCTION',
-    'THIS',
-    'WITH',
-    'DEFAULT',
-    'IF',
-    'THROW',
-    'DELETE',
-    'IN',
-    'TRY',)
-    def identifier(self, p):
-        err = JSON5DecodeError(f"Illegal name ({p[0]}) is a reserved keyword and may not be used", p._slice[0])
-        self.errors.append(err)
-        return Identifier(name=p[0])
-
     def error(self, token):
         if token:
             self.errors.append(JSON5DecodeError('Syntax Error', token))
