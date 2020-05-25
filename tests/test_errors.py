@@ -1,6 +1,6 @@
 from json5.loader import loads, ModelLoader, DefaultLoader
 from json5.dumper import DefaultDumper, ModelDumper, modelize
-from json5.model import LineComment
+from json5.model import LineComment, Integer
 import pytest
 
 from json5.utils import JSON5DecodeError
@@ -102,3 +102,7 @@ def test_null_escape_may_not_be_followed_by_decimal_digit_but_for_double_quotes(
     with pytest.raises(JSON5DecodeError) as exc_info:
         loads(r'"\01"')
     assert "'\\0' MUST NOT be followed by a decimal digit" in str(exc_info.value)
+
+def test_integer_octal_hex_mutually_exclusive():
+    with pytest.raises(ValueError):
+        Integer(raw_value='0o0', is_hex=True, is_octal=True)
