@@ -64,8 +64,10 @@ class KeyValuePair(Node):
 
 
 class Identifier(Key):
-    def __init__(self, name, raw_value):
+    def __init__(self, name, raw_value=None):
         assert isinstance(name, str)
+        if raw_value is None:
+            raw_value = name
         assert isinstance(raw_value, str)
         assert len(name) > 0
         super().__init__(name=name, raw_value=raw_value)
