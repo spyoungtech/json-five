@@ -11,3 +11,6 @@ def test_identifier_equals_like_string():
 def test_repr_does_not_contain_wsc():
     model = modelize({'foo': 'bar'})
     assert 'wsc' not in repr(model)
+
+def test_identifier_does_not_need_explicit_raw_value():
+    assert Identifier('foo').raw_value == 'foo'
