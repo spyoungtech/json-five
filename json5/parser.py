@@ -71,6 +71,7 @@ class JSONParser(Parser):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.errors = []
+        self.last_token = None
 
 
     @_('{ wsc } value { wsc }')
@@ -255,9 +256,18 @@ class JSONParser(Parser):
     def double_quoted_string(self, p):
         raw_value = p[0]
         contents = raw_value[1:-1]
-        if re.search(r'(?<!\\)([\u000D\u2028\u2029]|(?<!\r)\n)', contents):
-            errmsg = f"Illegal line terminator without continuation"
-            self.errors.append(JSON5DecodeError(errmsg, p._slice[0]))
+        terminator_in_string = re.search(r'(?<!\\)([\u000D\u2028\u2029]|(?<!\r)\n)', contents)
+        if terminator_in_string:
+            end = terminator_in_string.span()[0]
+            before_terminator = terminator_in_string.string[:end]
+            tok = p._slice[0]
+            pos = tok.index + len(before_terminator)
+            doc = tok.doc
+            lineno = doc.count('\n', 0, pos) + 1
+            colno = pos - doc.rfind('\n', 0, pos) + 1
+            index = pos + 1
+            errmsg = f"Illegal line terminator (line {lineno} column {colno} (char {index}) without continuation"
+            self.errors.append(JSON5DecodeError(errmsg, tok))
         contents = re.sub(r'\\(\r\n|[\u000A\u000D\u2028\u2029])', '', contents)
         try:
             contents = re.sub(r'(\\x[a-fA-F0-9]{0,2}|\\u[0-9a-fA-F]{4})', latin_unicode_escape_replace, contents)
@@ -273,9 +283,18 @@ class JSONParser(Parser):
     def single_quoted_string(self, p):
         raw_value = p[0]
         contents = raw_value[1:-1]
-        if re.search(r'(?<!\\)([\u000D\u2028\u2029]|(?<!\r)\n)', contents):
-            errmsg = f"Illegal line terminator without continuation"
-            self.errors.append(JSON5DecodeError(errmsg, p._slice[0]))
+        terminator_in_string = re.search(r'(?<!\\)([\u000D\u2028\u2029]|(?<!\r)\n)', contents)
+        if terminator_in_string:
+            end = terminator_in_string.span()[0]
+            before_terminator = terminator_in_string.string[:end]
+            tok = p._slice[0]
+            pos = tok.index + len(before_terminator)
+            doc = tok.doc
+            lineno = doc.count('\n', 0, pos) + 1
+            colno = pos - doc.rfind('\n', 0, pos) + 1
+            index = pos + 1
+            errmsg = f"Illegal line terminator (line {lineno} column {colno} (char {index}) without continuation"
+            self.errors.append(JSON5DecodeError(errmsg, tok))
         contents = re.sub(r'\\(\r\n|[\u000A\u000D\u2028\u2029])', '', contents)
         try:
             contents = re.sub(r'(\\x[a-fA-F0-9]{0,2}|\\u[0-9a-fA-F]{4})', latin_unicode_escape_replace, contents)
@@ -317,11 +336,24 @@ class JSONParser(Parser):
     def error(self, token):
         if token:
             self.errors.append(JSON5DecodeError('Syntax Error', token))
+        elif self.last_token:
+            doc = self.last_token.doc
+            pos = len(doc)
+            lineno = doc.count('\n', 0, pos) + 1
+            colno = pos - doc.rfind('\n', 0, pos)
+            self.errors.append(JSON5DecodeError(f'Expecting value. Unexpected EOF at: '
+                                                f'line {lineno} column {colno} (char {pos})', None))
         else:
             self.errors.append(JSON5DecodeError('Expecting value. Received unexpected EOF', None))
 
-    def parse(self, *args, **kwargs):
-        model = super().parse(*args, **kwargs)
+    def _token_gen(self, tokens):
+        for tok in tokens:
+            self.last_token = tok
+            yield tok
+
+    def parse(self, tokens):
+        tokens = self._token_gen(tokens)
+        model = super().parse(tokens)
         if self.errors:
             if len(self.errors) > 1:
                 primary_error = self.errors[0]
