@@ -224,7 +224,7 @@ class ModelDumper:
     @to_json(Identifier)
     def identifier_to_json(self, node):
         self.process_wsc_before(node)
-        self.env.write(node.name)
+        self.env.write(node.raw_value)
         self.process_wsc_after(node)
 
     @to_json(Integer)

@@ -1,4 +1,6 @@
-from json5 import loads, load, JSON5DecodeError
+from json5 import loads, load, JSON5DecodeError, dumps
+from json5.loader import ModelLoader
+from json5.dumper import ModelDumper
 import os
 import pytest
 from io import open
@@ -21,13 +23,15 @@ def test_official_files(fp):
     if not os.path.exists(tests_path):
         pytest.mark.skip("Tests repo was not present in expected location. Skipping.")
         return
-    try:
-        load(open(fp, encoding='utf-8'))
-    except JSON5DecodeError:
-        if 'todo' in fp:
-            pytest.mark.xfail("TODO files expected to fail")
-        else:
-            raise
+    load(open(fp, encoding='utf-8'))
+
+@pytest.mark.parametrize('fp', specs)
+def test_official_files_rt(fp):
+    if not os.path.exists(tests_path):
+        pytest.mark.skip("Tests repo was not present in expected location. Skipping.")
+    with open(fp, encoding='utf-8') as f:
+        json_string = f.read()
+    assert dumps(loads(json_string, loader=ModelLoader()), dumper=ModelDumper()) == json_string
 
 @pytest.mark.parametrize(('input_file', 'expected'), error_specs)
 def test_official_error_specs(input_file, expected):

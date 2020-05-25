@@ -64,10 +64,11 @@ class KeyValuePair(Node):
 
 
 class Identifier(Key):
-    def __init__(self, name):
+    def __init__(self, name, raw_value):
         assert isinstance(name, str)
+        assert isinstance(raw_value, str)
         assert len(name) > 0
-        super().__init__(name=name)
+        super().__init__(name=name, raw_value=raw_value)
 
     def __hash__(self):
         return hash(self.name)
