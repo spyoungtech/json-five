@@ -20,12 +20,6 @@ def test_loading_unknown_node_raises_error():
         DefaultLoader().load(f)
 
 
-def test_reserved_keywords_raise_error():
-    json_string = """{break: "not good!"}"""
-    with pytest.raises(JSON5DecodeError):
-        loads(json_string)
-
-
 def test_dumping_unknown_node_raises_error():
     class Foo(object):
         ...
