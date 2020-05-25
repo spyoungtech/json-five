@@ -299,3 +299,7 @@ def test_escape_unicode():
     }
     """
     assert loads(json_string) == {"sig\u03A3ma": "\u03A3 is the sum of all things"}
+
+def test_load_identifier_with_connector_punctuation():
+    json_string = """{foo⁀bar: 1}"""
+    assert loads(json_string) == {"foo⁀bar": 1}

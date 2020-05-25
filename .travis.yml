@@ -7,7 +7,7 @@ python:
   - "3.8"
 
 install:
-  - pip install sly coverage coveralls
+  - pip install sly regex coverage coveralls
   - git clone https://github.com/json5/json5-tests.git
 
 script:

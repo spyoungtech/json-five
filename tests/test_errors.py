@@ -106,3 +106,9 @@ def test_null_escape_may_not_be_followed_by_decimal_digit_but_for_double_quotes(
 def test_integer_octal_hex_mutually_exclusive():
     with pytest.raises(ValueError):
         Integer(raw_value='0o0', is_hex=True, is_octal=True)
+
+def test_invalid_identifier_via_escape_sequence():
+    json_string = """{\\u005Cfoo: 1}"""
+    with pytest.raises(JSON5DecodeError) as exc_info:
+        loads(json_string)
+    assert "Invalid identifier name" in str(exc_info.value)

@@ -1,4 +1,4 @@
-import re
+import regex as re
 
 import sys
 
@@ -191,6 +191,9 @@ class JSONParser(Parser):
     def identifier(self, p):
         raw_value = p[0]
         name = re.sub(r'\\u[0-9a-fA-F]{4}', unicode_escape_replace, raw_value)
+        pattern = r'[\w_\$]([\w_\d\$\p{Pc}\p{Mn}\p{Mc}\u200C\u200D])*'
+        if not re.fullmatch(pattern, name):
+            self.errors.append(JSON5DecodeError("Invalid identifier name", p._slice[0]))
         return Identifier(name=name, raw_value=raw_value)
 
     @_('identifier',
