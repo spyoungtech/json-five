@@ -333,6 +333,15 @@ class JSONParser(Parser):
         node = p[0]
         return node
 
+    @_('UNTERMINATED_SINGLE_QUOTE_STRING',
+       'UNTERMINATED_DOUBLE_QUOTE_STRING')
+    def string(self, p):
+        self.error(p._slice[0])
+        raw = p[0]
+        if raw.startswith('"'):
+            return DoubleQuotedString(raw[1:], raw_value=raw)
+        return SingleQuotedString(raw[1:], raw_value=raw)
+
     def error(self, token):
         if token:
             self.errors.append(JSON5DecodeError('Syntax Error', token))
