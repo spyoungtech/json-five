@@ -38,8 +38,5 @@ def test_official_error_specs(input_file, expected):
     if not os.path.exists(tests_path):
         pytest.mark.skip("Tests repo was not present in expected location. Skipping.")
         return
-    if 'octal' in input_file:
-        pytest.mark.xfail("Octals are dumb")
-        return
     with pytest.raises(JSON5DecodeError) as exc_info:
         load(open(input_file, encoding='utf-8'))

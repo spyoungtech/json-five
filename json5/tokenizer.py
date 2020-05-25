@@ -41,7 +41,8 @@ class JSONLexer(Lexer):
               PLUS, MINUS,
               FLOAT, INTEGER,
               INFINITY, NAN, EXPONENT,
-              HEXADECIMAL
+              HEXADECIMAL,
+              OCTAL  # Not allowed, but we capture as a token to raise error later
               }
 
     def tokenize(self, text, *args, **kwargs):
@@ -74,6 +75,7 @@ class JSONLexer(Lexer):
     PLUS = r'\+'
     EXPONENT = r"(e|E)(\-|\+)?\d+"
     HEXADECIMAL = r'0(x|X)[0-9a-fA-F]+'
+    OCTAL = r'(0\d+|0o\d+)'
     FLOAT = r'(\d+\.\d*)|(\d*\.\d+)'      # 23.45
     INTEGER = r'\d+'
     NAME = r'[\w_\$\\]([\w_\d\$\\])*'

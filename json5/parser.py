@@ -207,6 +207,17 @@ class JSONParser(Parser):
     def number(self, p):
         return Float(p[0])
 
+    @_('OCTAL')
+    def number(self, p):
+        self.errors.append(JSON5DecodeError("Invalid integer literal. Octals are not allowed", p._slice[0]))
+        raw_value = p[0]
+        if re.search(r'[89]+', raw_value):
+            self.errors.append(JSON5DecodeError("Invalid octal format. Octal digits must be in range 0-7", p._slice[0]))
+            return Integer(raw_value=oct(0), is_octal=True)
+        return Integer(raw_value, is_octal=True)
+
+
+
     @_('INFINITY')
     def number(self, p):
         return Infinity()
