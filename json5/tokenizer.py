@@ -1,4 +1,4 @@
-import re
+import regex as re
 import sys
 from sly import Lexer
 from sly.lex import Token
@@ -25,6 +25,7 @@ class JSON5Token(Token):
 
 
 class JSONLexer(Lexer):
+    regex_module = re
     reflags = re.DOTALL
     tokens = {LBRACE, RBRACE,
               LBRACKET, RBRACKET,
@@ -78,7 +79,7 @@ class JSONLexer(Lexer):
     OCTAL = r'(0\d+|0o\d+)'
     FLOAT = r'(\d+\.\d*)|(\d*\.\d+)'      # 23.45
     INTEGER = r'\d+'
-    NAME = r'[\w_\$\\]([\w_\d\$\\])*'
+    NAME = r'[\w_\$\\]([\w_\d\$\\\p{Pc}\p{Mn}\p{Mc}\u200C\u200D])*'
 
     NAME['true'] = TRUE
     NAME['false'] = FALSE
