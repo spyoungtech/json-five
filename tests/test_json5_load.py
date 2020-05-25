@@ -291,3 +291,11 @@ def test_load_latin_escape():
 
 def test_latin_escape_backslash_is_not_real_backslack():
     assert loads("""'\\x5C01'""") == "\\01"
+
+def test_escape_unicode():
+    json_string = """
+    {
+        sig\\u03A3ma: "\\u03A3 is the sum of all things"
+    }
+    """
+    assert loads(json_string) == {"sig\u03A3ma": "\u03A3 is the sum of all things"}

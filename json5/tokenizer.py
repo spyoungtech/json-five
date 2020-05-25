@@ -76,7 +76,7 @@ class JSONLexer(Lexer):
     HEXADECIMAL = r'0(x|X)[0-9a-fA-F]+'
     FLOAT = r'(\d+\.\d*)|(\d*\.\d+)'      # 23.45
     INTEGER = r'\d+'
-    NAME = r'[a-zA-Z_\$]([a-zA-Z_\d\$])*'
+    NAME = r'[\w_\$\\]([\w_\d\$\\])*'
 
     NAME['true'] = TRUE
     NAME['false'] = FALSE

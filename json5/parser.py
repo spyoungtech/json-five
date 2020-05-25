@@ -43,7 +43,7 @@ def replace_escape_literals(matchobj):
 
 @lru_cache(maxsize=1024)
 def _latin_escape_replace(s):
-    if len(s) != 4:
+    if s.startswith('\\x') and len(s) != 4:
         raise JSON5DecodeError("'\\x' MUST be followed by two hexadecimal digits", None)
     val = ast.literal_eval(f'"{s}"')
     if val == '\\':
@@ -51,10 +51,17 @@ def _latin_escape_replace(s):
     return val
 
 
-def latin_escape_replace(matchobj):
+def latin_unicode_escape_replace(matchobj):
     s = matchobj.group(0)
     return _latin_escape_replace(s)
 
+
+def _unicode_escape_replace(s):
+    return ast.literal_eval(f'"{s}"')
+
+def unicode_escape_replace(matchobj):
+    s = matchobj.group(0)
+    return _unicode_escape_replace(s)
 
 class JSONParser(Parser):
     # debugfile = 'parser.out'
@@ -182,7 +189,9 @@ class JSONParser(Parser):
 
     @_('NAME')
     def identifier(self, p):
-        return Identifier(name=p[0])
+        raw_value = p[0]
+        name = re.sub(r'\\u[0-9a-fA-F]{4}', unicode_escape_replace, raw_value)
+        return Identifier(name=name, raw_value=raw_value)
 
     @_('identifier',
        'string')
@@ -237,7 +246,7 @@ class JSONParser(Parser):
             self.errors.append(JSON5DecodeError(errmsg, p._slice[0]))
         contents = re.sub(r'\\(\r\n|[\u000A\u000D\u2028\u2029])', '', contents)
         try:
-            contents = re.sub(r'\\x[a-fA-F0-9]{0,2}', latin_escape_replace, contents)
+            contents = re.sub(r'(\\x[a-fA-F0-9]{0,2}|\\u[0-9a-fA-F]{4})', latin_unicode_escape_replace, contents)
         except JSON5DecodeError as exc:
             self.errors.append(JSON5DecodeError(exc.args[0], p._slice[0]))
         try:
@@ -255,7 +264,7 @@ class JSONParser(Parser):
             self.errors.append(JSON5DecodeError(errmsg, p._slice[0]))
         contents = re.sub(r'\\(\r\n|[\u000A\u000D\u2028\u2029])', '', contents)
         try:
-            contents = re.sub(r'\\x[a-fA-F0-9]{0,2}', latin_escape_replace, contents)
+            contents = re.sub(r'(\\x[a-fA-F0-9]{0,2}|\\u[0-9a-fA-F]{4})', latin_unicode_escape_replace, contents)
         except JSON5DecodeError as exc:
             self.errors.append(JSON5DecodeError(exc.args[0], p._slice[0]))
         try:
