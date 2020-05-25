@@ -369,7 +369,7 @@ class JSONParser(Parser):
                 additional_errors = '\n\t'.join(err.args[0] for err in self.errors[1:])
                 msg = "There were multiple errors parsing the JSON5 document.\n" \
                       "The primary error was: \n\t{}\n" \
-                      "Additionally, the following errors were also detected:\n\t {}"
+                      "Additionally, the following errors were also detected:\n\t{}"
                 msg = msg.format(primary_error.args[0], additional_errors)
                 err = JSON5DecodeError(msg, None)
                 err.lineno = primary_error.lineno
