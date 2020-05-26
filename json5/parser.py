@@ -72,6 +72,7 @@ class JSONParser(Parser):
         super().__init__(*args, **kwargs)
         self.errors = []
         self.last_token = None
+        self.seen_tokens = []
 
 
     @_('{ wsc } value { wsc }')
@@ -103,7 +104,7 @@ class JSONParser(Parser):
             for wsc in p.wsc:
                 node.key.wsc_before.append(wsc)
         else:
-            node = TrailingComma()
+            node = TrailingComma(tok=p._slice[0])
             for wsc in p.wsc:
                 node.wsc_after.append(wsc)
         return node
@@ -128,8 +129,12 @@ class JSONParser(Parser):
     @_('first_key_value_pair { subsequent_key_value_pair }')
     def key_value_pairs(self, p):
         ret = [p.first_key_value_pair, ]
-        for kvp in p.subsequent_key_value_pair:
+        num_sqvp = len(p.subsequent_key_value_pair)
+        for index, kvp in enumerate(p.subsequent_key_value_pair):
             if isinstance(kvp, TrailingComma):
+                if index != num_sqvp - 1:
+                    offending_token = p.subsequent_key_value_pair[index+1].tok
+                    self.errors.append(JSON5DecodeError("Syntax Error: multiple trailing commas", offending_token))
                 return ret, kvp
             ret.append(kvp)
         return ret, None
@@ -160,7 +165,7 @@ class JSONParser(Parser):
             for wsc in p.wsc:
                 node.wsc_before.append(wsc)
         else:
-            node = TrailingComma()
+            node = TrailingComma(tok=p._slice[0])
             for wsc in p.wsc:
                 node.wsc_after.append(wsc)
         return node
@@ -168,8 +173,11 @@ class JSONParser(Parser):
     @_('first_array_value { subsequent_array_value }')
     def array_values(self, p):
         ret = [p.first_array_value, ]
-        for value in p.subsequent_array_value:
+        num_values = len(p.subsequent_array_value)
+        for index, value in enumerate(p.subsequent_array_value):
             if isinstance(value, TrailingComma):
+                if index != num_values - 1:
+                    self.errors.append(JSON5DecodeError("Syntax Error: multiple trailing commas", p.subsequent_array_value[index+1].tok))
                 return ret, value
             ret.append(value)
         return ret, None
@@ -358,6 +366,7 @@ class JSONParser(Parser):
     def _token_gen(self, tokens):
         for tok in tokens:
             self.last_token = tok
+            self.seen_tokens.append(tok)
             yield tok
 
     def parse(self, tokens):

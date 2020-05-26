@@ -157,3 +157,14 @@ def test_unterminated_string(json_string):
         loads(json_string)
     assert "UNTERMINATED" in str(exc_info.value)
     assert "7" in str(exc_info.value)  # The index where the underminated string begins
+
+
+def test_array_multiple_trailing_commas_raises_error():
+    with pytest.raises(JSON5DecodeError) as exc_info:
+        loads('["foo",,]')
+    assert "multiple trailing commas" in str(exc_info.value)
+
+def test_object_multiple_trailing_commas_raises_error():
+    with pytest.raises(JSON5DecodeError) as exc_info:
+        loads('{foo: "bar",,}')
+    assert "multiple trailing commas" in str(exc_info.value)
