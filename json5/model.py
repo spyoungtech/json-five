@@ -164,8 +164,8 @@ class UnaryOp(Value):
         super().__init__(op=op, value=value)
 
 class TrailingComma(Node):
-    ...
-
+    def __init__(self, tok):
+        super().__init__(tok=tok)
 
 class Comment(Node):
     def __init__(self, value):

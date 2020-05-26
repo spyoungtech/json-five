@@ -150,3 +150,21 @@ def test_malformed_octals_result_in_additional_error():
     with pytest.raises(JSON5DecodeError) as exc_info:
         loads(json_string)
     assert "Invalid octal format" in str(exc_info.value)
+
+@pytest.mark.parametrize('json_string', ['{foo: "bar}', "{foo: 'bar}"])
+def test_unterminated_string(json_string):
+    with pytest.raises(JSON5DecodeError) as exc_info:
+        loads(json_string)
+    assert "UNTERMINATED" in str(exc_info.value)
+    assert "7" in str(exc_info.value)  # The index where the underminated string begins
+
+
+def test_array_multiple_trailing_commas_raises_error():
+    with pytest.raises(JSON5DecodeError) as exc_info:
+        loads('["foo",,]')
+    assert "multiple trailing commas" in str(exc_info.value)
+
+def test_object_multiple_trailing_commas_raises_error():
+    with pytest.raises(JSON5DecodeError) as exc_info:
+        loads('{foo: "bar",,}')
+    assert "multiple trailing commas" in str(exc_info.value)

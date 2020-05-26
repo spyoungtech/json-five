@@ -30,6 +30,8 @@ class JSONLexer(Lexer):
     tokens = {LBRACE, RBRACE,
               LBRACKET, RBRACKET,
               DOUBLE_QUOTE_STRING, SINGLE_QUOTE_STRING,
+              UNTERMINATED_DOUBLE_QUOTE_STRING,
+              UNTERMINATED_SINGLE_QUOTE_STRING,
               NAME,
               COMMA,
               BLOCK_COMMENT,
@@ -86,6 +88,9 @@ class JSONLexer(Lexer):
     NAME['null'] = NULL
     NAME['Infinity'] = INFINITY
     NAME['NaN'] = NAN
+
+    UNTERMINATED_DOUBLE_QUOTE_STRING = r'"(?:[^"\\]|\\.)*'
+    UNTERMINATED_SINGLE_QUOTE_STRING = r"'(?:[^'\\]|\\.)*"
 
     def error(self, t):
         raise JSON5DecodeError(f'Illegal character {t.value[0]!r} at index {self.index}', None)
