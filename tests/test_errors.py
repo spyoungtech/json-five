@@ -168,3 +168,48 @@ def test_object_multiple_trailing_commas_raises_error():
     with pytest.raises(JSON5DecodeError) as exc_info:
         loads('{foo: "bar",,}')
     assert "multiple trailing commas" in str(exc_info.value)
+
+def test_expecting_rbracket():
+    json_string = """[true, false"""
+    with pytest.raises(JSON5DecodeError) as exc_info:
+        loads(json_string)
+
+
+
+
+def test_array_expecting_value_or_bracket():
+    json_string = '['
+    with pytest.raises(JSON5DecodeError) as exc_info:
+        loads(json_string)
+    assert 'RBRACKET or value' in str(exc_info.value)
+
+def test_array_expecting_comma_or_bracket():
+    json_string = '[true'
+    with pytest.raises(JSON5DecodeError) as exc_info:
+        loads(json_string)
+    assert "RBRACKET or COMMA" in str(exc_info.value)
+
+def test_array_expecting_value_or_bracket_trailing_comma():
+    json_string = '[true,'
+    with pytest.raises(JSON5DecodeError) as exc_info:
+        loads(json_string)
+
+    assert 'RBRACKET or value' in str(exc_info.value)
+
+def test_object_expecting_value_or_brace():
+    json_string = '{'
+    with pytest.raises(JSON5DecodeError) as exc_info:
+        loads(json_string)
+    assert 'RBRACE or key' in str(exc_info.value)
+
+def test_object_expecting_comma_or_brace():
+    json_string = '{foo: true'
+    with pytest.raises(JSON5DecodeError) as exc_info:
+        loads(json_string)
+    assert "COMMA or RBRACE" in str(exc_info.value)
+
+def test_object_expecting_key_or_brace_trailing_comma():
+    json_string = '{foo: true,'
+    with pytest.raises(JSON5DecodeError) as exc_info:
+        loads(json_string)
+    assert 'RBRACE or key' in str(exc_info.value)
