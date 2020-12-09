@@ -32,6 +32,12 @@ comment that can span lines /*
 {"foo": "bar", "bacon": "eggs"}
 ```
 
+You can also use `json5.tool` for validating json.
+
+```
+python3 -m json5.tool < myfile.json5
+```
+
 See also the [full documentation](https://json-five.readthedocs.io/en/latest/)
 
 ## Key features
