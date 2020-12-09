@@ -25,5 +25,11 @@ import io
 """["foo" , ]""",
 ])
 def test_tool(json_string):
-    r = subprocess.run(['python3', '-m', 'json5.tool'], text=True, input=json_string, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    r = subprocess.run(
+        ["python3", "-m", "json5.tool"],
+        universal_newlines=True,
+        input=json_string,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    )
     assert r.stdout[:-1] == json_string
