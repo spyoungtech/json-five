@@ -12,15 +12,14 @@ def main():
     parser = argparse.ArgumentParser(prog=prog, description=description)
     parser.add_argument('infile', nargs='?',
                         type=argparse.FileType(encoding="utf-8"),
-                        help='a JSON file to be validated or pretty-printed',
+                        help='a JSON file to be validated',
                         default=sys.stdin)
     parser.add_argument('outfile', nargs='?',
                         type=argparse.FileType('w', encoding="utf-8"),
                         help='write the output of infile to outfile',
                         default=sys.stdout)
     parser.add_argument('--json-lines', action='store_true', default=False,
-                        help='parse input using the JSON Lines format. '
-                        'Use with --no-indent or --compact to produce valid JSON Lines output.')
+                        help='parse input using the JSON Lines format.')
     options = parser.parse_args()
 
     dump_args = {
