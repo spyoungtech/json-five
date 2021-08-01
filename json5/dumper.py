@@ -1,3 +1,4 @@
+from .loader import JsonIdentifier
 from .utils import singledispatchmethod
 from json5.model import *
 from collections import UserDict
@@ -80,24 +81,26 @@ class DefaultDumper:
     @to_json(int)
     def int_to_json(self, i):
         self.env.write(str(i), indent=0)
-    
+
+    @to_json(JsonIdentifier)
+    def identifier_to_json(self, s):
+        if isinstance(s, JsonIdentifier):
+            quote_char = None
+        elif "'" in s:
+            quote_char = '"'
+        else:
+            quote_char = "'"
+
+        if quote_char:
+            self.env.write(quote_char, indent=0)
+        self.env.write(s, indent=0)
+        if quote_char:
+            self.env.write(quote_char, indent=0)
     
     @to_json(str)
     def str_to_json(self, s):
         self.env.write(json.dumps(s), indent=0)
-        # if isinstance(s, JsonIdentifier):
-        #     quote_char = None
-        # elif "'" in s:
-        #     quote_char = '"'
-        # else:
-        #     quote_char = "'"
-        #
-        # if quote_char:
-        #     self.env.write(quote_char, indent=0)
-        # self.env.write(s, indent=0)
-        # if quote_char:
-        #     self.env.write(quote_char, indent=0)
-    
+
     
     @to_json(list)
     def list_to_json(self, l):
