@@ -30,7 +30,7 @@ def load(f, **kwargs):
     :return:
     """
     text = f.read()
-    return loads(text)
+    return loads(text, **kwargs)
 
 def loads(s, *args, loader=None, **kwargs):
     """
