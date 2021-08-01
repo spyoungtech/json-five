@@ -27,7 +27,15 @@ def test_official_files(fp):
     load(open(fp, encoding='utf-8'))
 
 @pytest.mark.parametrize('fp', specs)
-def test_official_files_rt(fp):
+def test_official_files_rt_dumps_no_error(fp):
+    if not os.path.exists(tests_path):
+        pytest.mark.skip("Tests repo was not present in expected location. Skipping.")
+    with open(fp, encoding='utf-8') as f:
+        json_string = f.read()
+    dumps(loads(json_string))
+
+@pytest.mark.parametrize('fp', specs)
+def test_official_files_rt_model(fp):
     if not os.path.exists(tests_path):
         pytest.mark.skip("Tests repo was not present in expected location. Skipping.")
     with open(fp, encoding='utf-8') as f:
