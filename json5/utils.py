@@ -31,5 +31,3 @@ class JSON5DecodeError(JSONDecodeError):
 
     def __reduce__(self):
         return self.__class__, (self.msg, self.token)
-
-

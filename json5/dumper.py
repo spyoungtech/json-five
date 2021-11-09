@@ -47,9 +47,9 @@ class DefaultDumper:
     @singledispatchmethod
     def dump(self, obj):
         raise NotImplementedError(f"Cannot dump node {repr(obj)}")
-    
+
     to_json = dump.register
-    
+
     @to_json(dict)
     def dict_to_json(self, d):
         self.env.write('{', indent=0)
@@ -69,15 +69,15 @@ class DefaultDumper:
                 self.env.write('\n', indent=0)
             else:
                 self.env.write(', ', indent=0)
-    
+
         if self.env.indent:
             self.env.indent_level -= 1
             self.env.write('\n')
             self.env.write('}')
         else:
             self.env.write('}', indent=0)
-    
-    
+
+
     @to_json(int)
     def int_to_json(self, i):
         self.env.write(str(i), indent=0)
@@ -90,7 +90,7 @@ class DefaultDumper:
     def str_to_json(self, s):
         self.env.write(json.dumps(s), indent=0)
 
-    
+
     @to_json(list)
     def list_to_json(self, l):
         self.env.write('[', indent=0)
@@ -112,8 +112,8 @@ class DefaultDumper:
         if self.env.indent:
             self.env.indent_level -= 1
         self.env.write(']')
-    
-    
+
+
     @to_json(float)
     def float_to_json(self, f):
         if f == math.inf:
@@ -297,16 +297,16 @@ class Modelizer:
     @singledispatchmethod
     def modelize(self, obj):
         raise NotImplementedError(f"Cannot modelize object of type {type(obj)}")
-    
+
     to_model = modelize.register
-    
+
     @to_model(str)
     def str_to_model(self, s):
         if repr(s).startswith("'"):
             return SingleQuotedString(s, raw_value=repr(s))
         else:
             return DoubleQuotedString(s, raw_value=repr(s))
-    
+
     @to_model(dict)
     def dict_to_model(self, d):
         kvps = []
@@ -314,14 +314,14 @@ class Modelizer:
             kvp = KeyValuePair(key=self.modelize(key), value=self.modelize(value))
             kvps.append(kvp)
         return JSONObject(*kvps)
-    
+
     @to_model(list)
     def list_to_model(self, lst):
         list_values = []
         for v in lst:
             list_values.append(self.modelize(v))
         return JSONArray(*list_values)
-    
+
     @to_model(int)
     def int_to_model(self, i):
         return Integer(str(i))

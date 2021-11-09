@@ -132,4 +132,3 @@ The resulting model:
         ],
         trailing_comma=None,
     )
-

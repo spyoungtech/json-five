@@ -133,5 +133,3 @@ The default dumper dumps python objects directly to JSON text.
 
 
 .. _JSON5 grammar: https://spec.json5.org/#grammar
-
-
