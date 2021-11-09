@@ -20,4 +20,3 @@ any whitespace or comments that appear before or after the node.
 
 This section will be expanded with time, the API for working with comments will likely change alot in future
 versions.
-

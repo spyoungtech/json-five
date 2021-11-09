@@ -37,4 +37,3 @@ You can also work directly with strings
 
 
 Want to do more? Check out :doc:`/extending` to dive deeper!
-

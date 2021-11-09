@@ -2,10 +2,10 @@
 
 JSON5 for Python
 
-[![Documentation Status](https://readthedocs.org/projects/json-five/badge/?version=latest)](https://json-five.readthedocs.io/en/latest/?badge=latest) 
-[![Build Status](https://travis-ci.com/spyoungtech/json-five.svg?branch=master)](https://travis-ci.com/spyoungtech/json-five) 
-[![version](https://img.shields.io/pypi/v/json-five.svg?colorB=blue)](https://pypi.org/project/json-five/) 
-[![pyversion](https://img.shields.io/pypi/pyversions/json-five.svg?)](https://pypi.org/project/json-five/) 
+[![Documentation Status](https://readthedocs.org/projects/json-five/badge/?version=latest)](https://json-five.readthedocs.io/en/latest/?badge=latest)
+[![Build Status](https://travis-ci.com/spyoungtech/json-five.svg?branch=master)](https://travis-ci.com/spyoungtech/json-five)
+[![version](https://img.shields.io/pypi/v/json-five.svg?colorB=blue)](https://pypi.org/project/json-five/)
+[![pyversion](https://img.shields.io/pypi/pyversions/json-five.svg?)](https://pypi.org/project/json-five/)
 [![Coverage](https://coveralls.io/repos/github/spyoungtech/json-five/badge.svg?branch=master)](https://coveralls.io/github/spyoungtech/json-five?branch=master)
 
 ## Installation
@@ -44,5 +44,5 @@ See also the [full documentation](https://json-five.readthedocs.io/en/latest/)
 
 ## Status
 
-This project is still in early stages of development. Check the [issues](https://github.com/spyoungtech/json-five/issues) 
+This project is still in early stages of development. Check the [issues](https://github.com/spyoungtech/json-five/issues)
 page to see known bugs and unimplemented features.
