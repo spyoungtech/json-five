@@ -44,5 +44,5 @@ See also the [full documentation](https://json-five.readthedocs.io/en/latest/)
 
 ## Status
 
-This project is still in early stages of development. Check the [issues](https://github.com/spyoungtech/json-five/issues)
+This project currently fully supports the JSON5 spec but is still undergoing active development, particularly for round-trip support and model-level edits. Additional features are still being added. Check the [issues](https://github.com/spyoungtech/json-five/issues)
 page to see known bugs and unimplemented features.
