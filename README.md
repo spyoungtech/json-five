@@ -32,6 +32,14 @@ comment that can span lines /*
 {"foo": "bar", "bacon": "eggs"}
 ```
 
+You can also use `json5.tool` for validating json.
+
+```
+python3 -m json5.tool < myfile.json5
+```
+As of right now, there is no formatting on the output; original whitespace and comments is maintained. 
+In the future, pretty-printing, stripping comments, and other options may be added.
+
 See also the [full documentation](https://json-five.readthedocs.io/en/latest/)
 
 ## Key features

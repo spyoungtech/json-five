@@ -170,7 +170,7 @@ class ModelDumper:
 
     @singledispatchmethod
     def dump(self, node):
-        raise NotImplementedError('foo')
+        raise NotImplementedError(f'Cannot dump node of type {type(node)}')
 
     to_json = dump.register
 
