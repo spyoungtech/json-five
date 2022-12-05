@@ -18,10 +18,11 @@ class JSON5Token(Token):
         self.lineno = tok.lineno
         self.index = tok.index
         self.doc = doc
-    __slots__ = ('type', 'value', 'lineno', 'index', 'doc')
+        self.end = getattr(tok, 'end', None)
+    __slots__ = ('type', 'value', 'lineno', 'index', 'doc', 'end')
 
     def __repr__(self):
-        return f'JSON5Token(type={self.type!r}, value={self.value!r}, lineno={self.lineno}, index={self.index})'
+        return f'JSON5Token(type={self.type!r}, value={self.value!r}, lineno={self.lineno}, index={self.index}, end={self.end})'
 
 
 class JSONLexer(Lexer):

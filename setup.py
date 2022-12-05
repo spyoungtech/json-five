@@ -6,7 +6,7 @@ with open('README.md', encoding='utf-8') as f:
 
 setup(
     name='json-five',
-    version='0.7.6',
+    version='0.8.0',
     packages=['json5'],
     url='https://github.com/spyoungtech/json-five',
     license='Apache',
@@ -15,7 +15,7 @@ setup(
     description='A JSON5 parser that, among other features, supports round-trip preservation of comments',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    install_requires=['sly<0.5', 'regex'],
+    install_requires=['sly', 'regex'],
     classifiers=[
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 3 :: Only',

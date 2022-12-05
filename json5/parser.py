@@ -422,6 +422,7 @@ class JSONParser(Parser):
                     value=None
                     lineno=None
                     index=None
+                    end=None
                 return JSON5Token(tok(), None)
         elif self.last_token:
             doc = self.last_token.doc
