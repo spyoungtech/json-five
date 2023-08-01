@@ -1,3 +1,6 @@
+import typing
+from typing import Generator, NoReturn
+
 import regex as re
 import sys
 from sly import Lexer  # type: ignore
@@ -8,11 +11,12 @@ import logging
 logger = logging.getLogger(__name__)
 # logger.addHandler(logging.StreamHandler(stream=sys.stderr))
 # logger.setLevel(level=logging.DEBUG)
-class JSON5Token(Token):
+
+class JSON5Token(Token):  # type: ignore[misc]
     '''
     Representation of a single token.
     '''
-    def __init__(self, tok, doc):
+    def __init__(self, tok: Token, doc: str):
         self.type = tok.type
         self.value = tok.value
         self.lineno = tok.lineno
@@ -21,11 +25,13 @@ class JSON5Token(Token):
         self.end = getattr(tok, 'end', None)
     __slots__ = ('type', 'value', 'lineno', 'index', 'doc', 'end')
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'JSON5Token(type={self.type!r}, value={self.value!r}, lineno={self.lineno}, index={self.index}, end={self.end})'
 
+T_CallArg = typing.TypeVar('T_CallArg')
+_: typing.Callable[[str], typing.Callable[[T_CallArg], T_CallArg]]
 
-class JSONLexer(Lexer):
+class JSONLexer(Lexer):  # type: ignore[misc]
     regex_module = re
     reflags = re.DOTALL
     tokens = {LBRACE, RBRACE,
@@ -49,8 +55,8 @@ class JSONLexer(Lexer):
               OCTAL  # Not allowed, but we capture as a token to raise error later
               }
 
-    def tokenize(self, text, *args, **kwargs):
-        for tok in super().tokenize(text, *args, **kwargs):
+    def tokenize(self, text: str, lineno: int = 1, index: int = 0) -> Generator[JSON5Token, None, None]:
+        for tok in super().tokenize(text, lineno, index):
             tok = JSON5Token(tok, text)
             yield tok
 
@@ -66,12 +72,12 @@ class JSONLexer(Lexer):
 
     LINE_COMMENT = r"//[^\n]*"
     @_(r'/\*((.|\n))*?\*/')
-    def BLOCK_COMMENT(self, tok):
+    def BLOCK_COMMENT(self, tok: JSON5Token) -> JSON5Token:
         self.lineno += tok.value.count('\n')
         return tok
 
     @_("[\u0009\u000A\u000B\u000C\u000D\u0020\u00A0\u2028\u2029\ufeff]+")
-    def WHITESPACE(self, tok):
+    def WHITESPACE(self, tok: JSON5Token) -> JSON5Token:
         self.lineno += tok.value.count('\n')
         return tok
 
@@ -93,10 +99,10 @@ class JSONLexer(Lexer):
     UNTERMINATED_DOUBLE_QUOTE_STRING = r'"(?:[^"\\]|\\.)*'
     UNTERMINATED_SINGLE_QUOTE_STRING = r"'(?:[^'\\]|\\.)*"
 
-    def error(self, t):
+    def error(self, t: JSON5Token) -> NoReturn:
         raise JSON5DecodeError(f'Illegal character {t.value[0]!r} at index {self.index}', None)
 
-def tokenize(text):
+def tokenize(text: str) -> Generator[JSON5Token, None, None]:
     lexer = JSONLexer()
     tokens = lexer.tokenize(text)
     return tokens

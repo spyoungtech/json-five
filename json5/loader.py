@@ -142,7 +142,7 @@ class DefaultLoader(LoaderBase):
         return node.value
 
     @to_python(Integer)
-    def integer_to_python(self, node) -> typing.Any:
+    def integer_to_python(self, node: Integer) -> typing.Any:
         if self.env.parse_int:
             return self.env.parse_int(node.raw_value)
         else:
@@ -156,7 +156,7 @@ class DefaultLoader(LoaderBase):
             return node.value
 
     @to_python(UnaryOp)
-    def unary_to_python(self, node) -> typing.Any:
+    def unary_to_python(self, node: UnaryOp) -> typing.Any:
         logger.debug('unary_to_python evaluating node %r', node)
         if isinstance(node.value, Infinity):
             return self.load(node.value)
@@ -167,23 +167,24 @@ class DefaultLoader(LoaderBase):
             return value
 
     @to_python(String)
-    def string_to_python(self, node):
+    def string_to_python(self, node: Union[DoubleQuotedString, SingleQuotedString]) -> str:
         logger.debug('string_to_python evaluating node %r', node)
-        return node.characters
+        ret : str = node.characters
+        return ret
 
 
     @to_python(NullLiteral)
-    def null_to_python(self, node):
+    def null_to_python(self, node: NullLiteral) -> None:
         logger.debug('null_to_python evaluating node %r', node)
         return None
 
     @to_python(BooleanLiteral)
-    def boolean_to_python(self, node):
+    def boolean_to_python(self, node: BooleanLiteral) -> bool:
         logger.debug('boolean_to_python evaluating node %r', node)
         return node.value
 
     @to_python(Comment)
-    def comment_or_whitespace_to_python(self, node):
+    def comment_or_whitespace_to_python(self, node: Comment) -> typing.NoReturn:
         raise RuntimeError("Comments are not supported in the default loader!")
 
 

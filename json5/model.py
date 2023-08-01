@@ -1,15 +1,40 @@
 from __future__ import annotations
 import math
-from typing import Optional, Union, List, Literal
+from typing import Optional, Union, List, Literal, Any
 from .tokenizer import JSON5Token
 
+__all__ = [
+    'Node',
+    'JSONText',
+    'Value',
+    'Key',
+    'JSONObject',
+    'JSONArray',
+    'KeyValuePair',
+    'Identifier',
+    'Number',
+    'Integer',
+    'Float',
+    'Infinity',
+    'NaN',
+    'String',
+    'DoubleQuotedString',
+    'SingleQuotedString',
+    'BooleanLiteral',
+    'NullLiteral',
+    'UnaryOp',
+    'TrailingComma',
+    'Comment',
+    'LineComment',
+    'BlockComment',
+]
 
 class Node:
     excluded_names = ['excluded_names', 'wsc_before', 'wsc_after', 'leading_wsc']
-    def __init__(self):
+    def __init__(self) -> None:
         # Whitespace/Comments before/after the node
-        self.wsc_before = []
-        self.wsc_after = []
+        self.wsc_before: List[Union[str, Comment]] = []
+        self.wsc_after: List[Union[str, Comment]] = []
 
     def __repr__(self) -> str:
         rep = (
@@ -88,7 +113,7 @@ class Identifier(Key):
     def __hash__(self) -> int:
         return hash(self.name)
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         return hash(self) == hash(other)
 
 
@@ -119,11 +144,11 @@ class Integer(Number):
 
 
 class Float(Number):
-    def __init__(self, raw_value: str, exp_notation: Optional[Literal['e', 'E']] = None, tok: Optional[JSON5Token] = None):
+    def __init__(self, raw_value: str, exp_notation: Optional[str] = None, tok: Optional[JSON5Token] = None):
         value = float(raw_value)
         assert exp_notation is None or exp_notation in ('e', 'E')
         self.raw_value: str = raw_value
-        self.exp_notation: Optional[Literal['e', 'E']] = exp_notation
+        self.exp_notation: Optional[str] = exp_notation
         self.tok: Optional[JSON5Token] = tok
         self.value: float = value
         super().__init__()
@@ -158,14 +183,14 @@ class NaN(Number):
         return math.nan
 
     @property
-    def const(self):
+    def const(self) -> Literal['NaN']:
         return 'NaN'
 
 class String(Value, Key):
     ...
 
 class DoubleQuotedString(String):
-    def __init__(self, characters, raw_value, tok: Optional[JSON5Token] = None):
+    def __init__(self, characters: str, raw_value: str, tok: Optional[JSON5Token] = None):
         assert isinstance(raw_value, str)
         assert isinstance(characters, str)
         self.characters: str = characters
@@ -185,7 +210,7 @@ class SingleQuotedString(String):
 
 
 class BooleanLiteral(Value):
-    def __init__(self, value, tok: Optional[JSON5Token] = None):
+    def __init__(self, value: bool, tok: Optional[JSON5Token] = None):
         assert value in (True, False)
         self.value: bool = value
         self.tok: Optional[JSON5Token] = tok
@@ -213,7 +238,7 @@ class TrailingComma(Node):
         super().__init__()
 
 class Comment(Node):
-    def __init__(self, value: str, tok=None):
+    def __init__(self, value: str, tok: Optional[JSON5Token] = None):
         assert isinstance(value, str), f"Expected str got {type(value)}"
         self.value: str = value
         self.tok: Optional[JSON5Token] = tok
