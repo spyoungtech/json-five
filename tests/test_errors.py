@@ -20,7 +20,7 @@ def test_loading_comment_raises_runtime_error_default_loader():
 
 
 def test_loading_unknown_node_raises_error():
-    class Foo(object):
+    class Foo:
         ...
 
     f = Foo()
@@ -29,7 +29,7 @@ def test_loading_unknown_node_raises_error():
 
 
 def test_dumping_unknown_node_raises_error():
-    class Foo(object):
+    class Foo:
         ...
 
     f = Foo()
@@ -142,17 +142,17 @@ def test_illegal_line_terminator_error_message(json_string):
         loads(json_string)
 
     exc_message = str(exc_info.value)
-    exc_lineno_match = re.search('line (\d+)', exc_message)
+    exc_lineno_match = re.search(r'line (\d+)', exc_message)
     if exc_lineno_match:
         exc_lineno = int(exc_lineno_match.groups()[0])
     else:
         exc_lineno = None
-    exc_col_match = re.search('column (\d+)', exc_message)
+    exc_col_match = re.search(r'column (\d+)', exc_message)
     if exc_col_match:
         exc_col = int(exc_col_match.groups()[0])
     else:
         exc_col = None
-    exc_index_match = re.search('char (\d+)', exc_message)
+    exc_index_match = re.search(r'char (\d+)', exc_message)
     if exc_index_match:
         exc_index = int(exc_index_match.groups()[0])
     else:
@@ -196,7 +196,7 @@ def test_object_multiple_trailing_commas_raises_error():
 
 def test_expecting_rbracket():
     json_string = """[true, false"""
-    with pytest.raises(JSON5DecodeError) as exc_info:
+    with pytest.raises(JSON5DecodeError):
         loads(json_string)
 
 

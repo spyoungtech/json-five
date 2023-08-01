@@ -2,10 +2,7 @@ from __future__ import annotations
 
 import math
 from typing import Any
-from typing import List
 from typing import Literal
-from typing import Optional
-from typing import Union
 
 from .tokenizer import JSON5Token
 
@@ -41,16 +38,14 @@ class Node:
 
     def __init__(self) -> None:
         # Whitespace/Comments before/after the node
-        self.wsc_before: List[Union[str, Comment]] = []
-        self.wsc_after: List[Union[str, Comment]] = []
+        self.wsc_before: list[str | Comment] = []
+        self.wsc_after: list[str | Comment] = []
 
     def __repr__(self) -> str:
         rep = (
             f"{self.__class__.__name__}("
             + ", ".join(
-                "{key}={value}".format(key=key, value=repr(value))
-                for key, value in self.__dict__.items()
-                if key not in self.excluded_names
+                f"{key}={repr(value)}" for key, value in self.__dict__.items() if key not in self.excluded_names
             )
             + ")"
         )
@@ -76,18 +71,18 @@ class JSONObject(Value):
     def __init__(
         self,
         *key_value_pairs: KeyValuePair,
-        trailing_comma: Optional[TrailingComma] = None,
-        leading_wsc: Optional[List[Union[str, Comment]]] = None,
-        tok: Optional[JSON5Token] = None,
+        trailing_comma: TrailingComma | None = None,
+        leading_wsc: list[str | Comment] | None = None,
+        tok: JSON5Token | None = None,
     ):
         kvps = list(key_value_pairs)
         for kvp in kvps:
             assert isinstance(kvp, KeyValuePair), f"Expected key value pair, got {type(kvp)}"
         assert leading_wsc is None or all(isinstance(item, str) or isinstance(item, Comment) for item in leading_wsc)
-        self.key_value_pairs: List[KeyValuePair] = kvps
-        self.trailing_comma: Optional[TrailingComma] = trailing_comma
-        self.leading_wsc: List[Union[str, Comment]] = leading_wsc or []
-        self.tok: Optional[JSON5Token] = tok
+        self.key_value_pairs: list[KeyValuePair] = kvps
+        self.trailing_comma: TrailingComma | None = trailing_comma
+        self.leading_wsc: list[str | Comment] = leading_wsc or []
+        self.tok: JSON5Token | None = tok
         super().__init__()
 
 
@@ -95,33 +90,33 @@ class JSONArray(Value):
     def __init__(
         self,
         *values: Value,
-        trailing_comma: Optional[TrailingComma] = None,
-        leading_wsc: Optional[List[Union[str, Comment]]] = None,
-        tok: Optional[JSON5Token] = None,
+        trailing_comma: TrailingComma | None = None,
+        leading_wsc: list[str | Comment] | None = None,
+        tok: JSON5Token | None = None,
     ):
         vals = list(values)
         for value in vals:
             assert isinstance(value, Value), f"Was expecting object with type Value. Got {type(value)}"
         assert leading_wsc is None or all(isinstance(item, str) or isinstance(item, Comment) for item in leading_wsc)
-        self.values: List[Value] = vals
-        self.trailing_comma: Optional[TrailingComma] = trailing_comma
-        self.leading_wsc: List[Union[str, Comment]] = leading_wsc or []
-        self.tok: Optional[JSON5Token] = tok
+        self.values: list[Value] = vals
+        self.trailing_comma: TrailingComma | None = trailing_comma
+        self.leading_wsc: list[str | Comment] = leading_wsc or []
+        self.tok: JSON5Token | None = tok
         super().__init__()
 
 
 class KeyValuePair(Node):
-    def __init__(self, key: Key, value: Value, tok: Optional[JSON5Token] = None):
+    def __init__(self, key: Key, value: Value, tok: JSON5Token | None = None):
         assert isinstance(key, Key)
         assert isinstance(value, Value)
         self.key: Key = key
         self.value: Value = value
-        self.tok: Optional[JSON5Token] = tok
+        self.tok: JSON5Token | None = tok
         super().__init__()
 
 
 class Identifier(Key):
-    def __init__(self, name: str, raw_value: Optional[str] = None, tok: Optional[JSON5Token] = None):
+    def __init__(self, name: str, raw_value: str | None = None, tok: JSON5Token | None = None):
         assert isinstance(name, str)
         if raw_value is None:
             raw_value = name
@@ -129,7 +124,7 @@ class Identifier(Key):
         assert len(name) > 0
         self.name: str = name
         self.raw_value: str = raw_value
-        self.tok: Optional[JSON5Token] = tok
+        self.tok: JSON5Token | None = tok
         super().__init__()
 
     def __hash__(self) -> int:
@@ -144,7 +139,7 @@ class Number(Value):
 
 
 class Integer(Number):
-    def __init__(self, raw_value: str, is_hex: bool = False, is_octal: bool = False, tok: Optional[JSON5Token] = None):
+    def __init__(self, raw_value: str, is_hex: bool = False, is_octal: bool = False, tok: JSON5Token | None = None):
         assert isinstance(raw_value, str)
         if is_hex and is_octal:
             raise ValueError("is_hex and is_octal are mutually exclusive")
@@ -161,25 +156,25 @@ class Integer(Number):
         self.raw_value: str = raw_value
         self.is_hex: bool = is_hex
         self.is_octal: bool = is_octal
-        self.tok: Optional[JSON5Token] = tok
+        self.tok: JSON5Token | None = tok
         super().__init__()
 
 
 class Float(Number):
-    def __init__(self, raw_value: str, exp_notation: Optional[str] = None, tok: Optional[JSON5Token] = None):
+    def __init__(self, raw_value: str, exp_notation: str | None = None, tok: JSON5Token | None = None):
         value = float(raw_value)
         assert exp_notation is None or exp_notation in ('e', 'E')
         self.raw_value: str = raw_value
-        self.exp_notation: Optional[str] = exp_notation
-        self.tok: Optional[JSON5Token] = tok
+        self.exp_notation: str | None = exp_notation
+        self.tok: JSON5Token | None = tok
         self.value: float = value
         super().__init__()
 
 
 class Infinity(Number):
-    def __init__(self, negative: bool = False, tok: Optional[JSON5Token] = None):
+    def __init__(self, negative: bool = False, tok: JSON5Token | None = None):
         self.negative: bool = negative
-        self.tok: Optional[JSON5Token] = tok
+        self.tok: JSON5Token | None = tok
         super().__init__()
 
     @property
@@ -195,8 +190,8 @@ class Infinity(Number):
 
 
 class NaN(Number):
-    def __init__(self, tok: Optional[JSON5Token] = None):
-        self.tok: Optional[JSON5Token] = tok
+    def __init__(self, tok: JSON5Token | None = None):
+        self.tok: JSON5Token | None = tok
         super().__init__()
 
     @property
@@ -213,62 +208,62 @@ class String(Value, Key):
 
 
 class DoubleQuotedString(String):
-    def __init__(self, characters: str, raw_value: str, tok: Optional[JSON5Token] = None):
+    def __init__(self, characters: str, raw_value: str, tok: JSON5Token | None = None):
         assert isinstance(raw_value, str)
         assert isinstance(characters, str)
         self.characters: str = characters
         self.raw_value: str = raw_value
-        self.tok: Optional[JSON5Token] = tok
+        self.tok: JSON5Token | None = tok
         super().__init__()
 
 
 class SingleQuotedString(String):
-    def __init__(self, characters: str, raw_value: str, tok: Optional[JSON5Token] = None):
+    def __init__(self, characters: str, raw_value: str, tok: JSON5Token | None = None):
         assert isinstance(raw_value, str)
         assert isinstance(characters, str)
         self.characters: str = characters
         self.raw_value: str = raw_value
-        self.tok: Optional[JSON5Token] = tok
+        self.tok: JSON5Token | None = tok
         super().__init__()
 
 
 class BooleanLiteral(Value):
-    def __init__(self, value: bool, tok: Optional[JSON5Token] = None):
+    def __init__(self, value: bool, tok: JSON5Token | None = None):
         assert value in (True, False)
         self.value: bool = value
-        self.tok: Optional[JSON5Token] = tok
+        self.tok: JSON5Token | None = tok
         super().__init__()
 
 
 class NullLiteral(Value):
     value = None
 
-    def __init__(self, tok: Optional[JSON5Token] = None):
-        self.tok: Optional[JSON5Token] = None
+    def __init__(self, tok: JSON5Token | None = None):
+        self.tok: JSON5Token | None = None
         super().__init__()
 
 
 class UnaryOp(Value):
-    def __init__(self, op: Literal['-', '+'], value: Number, tok: Optional[JSON5Token] = None):
+    def __init__(self, op: Literal['-', '+'], value: Number, tok: JSON5Token | None = None):
         assert op in ('-', '+')
         assert isinstance(value, Number)
         self.op: Literal['-', '+'] = op
         self.value: Number = value
-        self.tok: Optional[JSON5Token] = tok
+        self.tok: JSON5Token | None = tok
         super().__init__()
 
 
 class TrailingComma(Node):
-    def __init__(self, tok: Optional[JSON5Token] = None):
+    def __init__(self, tok: JSON5Token | None = None):
         self.tok = tok
         super().__init__()
 
 
 class Comment(Node):
-    def __init__(self, value: str, tok: Optional[JSON5Token] = None):
+    def __init__(self, value: str, tok: JSON5Token | None = None):
         assert isinstance(value, str), f"Expected str got {type(value)}"
         self.value: str = value
-        self.tok: Optional[JSON5Token] = tok
+        self.tok: JSON5Token | None = tok
         super().__init__()
 
 

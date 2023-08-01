@@ -5,9 +5,7 @@ import pytest
 from json5.dumper import dumps
 from json5.dumper import ModelDumper
 from json5.dumper import modelize
-from json5.loader import DefaultLoader
 from json5.loader import loads
-from json5.loader import ModelLoader
 
 
 @pytest.mark.parametrize(

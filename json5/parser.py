@@ -5,11 +5,8 @@ import sys
 import typing
 from functools import lru_cache
 from typing import Any
-from typing import List
 from typing import Literal
-from typing import Optional
 from typing import Protocol
-from typing import Union
 
 import regex as re
 from sly import Parser  # type: ignore
@@ -81,8 +78,8 @@ def unicode_escape_replace(matchobj: re.Match[str]) -> str:
 
 
 class T_TextProduction(Protocol):
-    wsc0: List[Union[Comment, str]]
-    wsc1: List[Union[Comment, str]]
+    wsc0: list[Comment | str]
+    wsc1: list[Comment | str]
 
     def __getitem__(self, i: Literal[1]) -> Value:
         ...
@@ -94,18 +91,18 @@ class T_TokenSlice(Protocol):
 
 
 class T_FirstKeyValuePairProduction(Protocol):
-    wsc0: List[Union[Comment, str]]
-    wsc1: List[Union[Comment, str]]
-    wsc2: List[Union[Comment, str]]
+    wsc0: list[Comment | str]
+    wsc1: list[Comment | str]
+    wsc2: list[Comment | str]
     key: Key
     value: Value
 
-    def __getitem__(self, item: int) -> Union[Key, Value]:
+    def __getitem__(self, item: int) -> Key | Value:
         ...
 
 
 class T_WSCProduction(Protocol):
-    def __getitem__(self, item: Literal[0]) -> Union[str, Comment]:
+    def __getitem__(self, item: Literal[0]) -> str | Comment:
         ...
 
 
@@ -118,18 +115,18 @@ class T_CommentProduction(Protocol):
 
 class T_KeyValuePairsProduction(Protocol):
     first_key_value_pair: KeyValuePair
-    subsequent_key_value_pair: List[KeyValuePair]
+    subsequent_key_value_pair: list[KeyValuePair]
 
 
 class T_JsonObjectProduction(Protocol):
-    key_value_pairs: Optional[typing.Tuple[List[KeyValuePair], Optional[TrailingComma]]]
+    key_value_pairs: tuple[list[KeyValuePair], TrailingComma | None] | None
     _slice: T_TokenSlice
-    wsc: List[Union[Comment, str]]
+    wsc: list[Comment | str]
 
 
 class SubsequentKeyValuePairProduction(Protocol):
-    wsc: List[Union[Comment, str]]
-    first_key_value_pair: Optional[KeyValuePair]
+    wsc: list[Comment | str]
+    first_key_value_pair: KeyValuePair | None
     _slice: T_TokenSlice
 
 
@@ -137,24 +134,24 @@ class T_FirstArrayValueProduction(Protocol):
     def __getitem__(self, item: Literal[1]) -> Value:
         ...
 
-    wsc: List[Union[Comment, str]]
+    wsc: list[Comment | str]
 
 
 class T_SubsequentArrayValueProduction(Protocol):
-    first_array_value: Optional[Value]
-    wsc: List[Union[Comment, str]]
+    first_array_value: Value | None
+    wsc: list[Comment | str]
     _slice: T_TokenSlice
 
 
 class T_ArrayValuesProduction(Protocol):
     first_array_value: Value
-    subsequent_array_value: List[Value]
+    subsequent_array_value: list[Value]
 
 
 class T_JsonArrayProduction(Protocol):
-    array_values: Optional[typing.Tuple[List[Value], Optional[TrailingComma]]]
+    array_values: tuple[list[Value], TrailingComma | None] | None
     _slice: T_TokenSlice
-    wsc: List[Union[Comment, str]]
+    wsc: list[Comment | str]
 
 
 class T_IdentifierProduction(Protocol):
@@ -165,7 +162,7 @@ class T_IdentifierProduction(Protocol):
 
 
 class T_KeyProduction(Protocol):
-    def __getitem__(self, item: Literal[1]) -> Union[Identifier, DoubleQuotedString, SingleQuotedString]:
+    def __getitem__(self, item: Literal[1]) -> Identifier | DoubleQuotedString | SingleQuotedString:
         ...
 
 
@@ -177,7 +174,7 @@ class T_NumberProduction(Protocol):
 
 
 class T_ValueNumberProduction(Protocol):
-    number: Union[Infinity, NaN, Float, Integer]
+    number: Infinity | NaN | Float | Integer
 
 
 class T_ExponentNotationProduction(Protocol):
@@ -193,25 +190,25 @@ class T_StringTokenProduction(Protocol):
 
 
 class T_StringProduction(Protocol):
-    def __getitem__(self, item: Literal[0]) -> Union[DoubleQuotedString, SingleQuotedString]:
+    def __getitem__(self, item: Literal[0]) -> DoubleQuotedString | SingleQuotedString:
         ...
 
 
 class T_ValueProduction(Protocol):
     def __getitem__(
         self, item: Literal[0]
-    ) -> Union[
-        DoubleQuotedString,
-        SingleQuotedString,
-        JSONObject,
-        JSONArray,
-        BooleanLiteral,
-        NullLiteral,
-        Infinity,
-        Integer,
-        Float,
-        NaN,
-    ]:
+    ) -> (
+        DoubleQuotedString
+        | SingleQuotedString
+        | JSONObject
+        | JSONArray
+        | BooleanLiteral
+        | NullLiteral
+        | Infinity
+        | Integer
+        | Float
+        | NaN
+    ):
         ...
 
 
@@ -226,10 +223,10 @@ class JSONParser(Parser):  # type: ignore[misc]
 
     def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
-        self.errors: List[JSON5DecodeError] = []
-        self.last_token: Optional[JSON5Token] = None
-        self.seen_tokens: List[JSON5Token] = []
-        self.expecting: List[List[str]] = []
+        self.errors: list[JSON5DecodeError] = []
+        self.last_token: JSON5Token | None = None
+        self.seen_tokens: list[JSON5Token] = []
+        self.expecting: list[list[str]] = []
 
     @_('{ wsc } value { wsc }')
     def text(self, p: T_TextProduction) -> JSONText:
@@ -253,8 +250,8 @@ class JSONParser(Parser):  # type: ignore[misc]
         return KeyValuePair(key=p.key, value=p.value, tok=getattr(key, 'tok'))
 
     @_('object_delimiter_seen COMMA { wsc } [ first_key_value_pair ]')
-    def subsequent_key_value_pair(self, p: SubsequentKeyValuePairProduction) -> Union[KeyValuePair, TrailingComma]:
-        node: Union[KeyValuePair, TrailingComma]
+    def subsequent_key_value_pair(self, p: SubsequentKeyValuePairProduction) -> KeyValuePair | TrailingComma:
+        node: KeyValuePair | TrailingComma
         if p.first_key_value_pair:
             node = p.first_key_value_pair
             for wsc in p.wsc:
@@ -266,7 +263,7 @@ class JSONParser(Parser):  # type: ignore[misc]
         return node
 
     @_('WHITESPACE', 'comment')
-    def wsc(self, p: T_WSCProduction) -> Union[str, Comment]:
+    def wsc(self, p: T_WSCProduction) -> str | Comment:
         return p[0]
 
     @_('BLOCK_COMMENT')
@@ -278,9 +275,7 @@ class JSONParser(Parser):  # type: ignore[misc]
         return LineComment(p[0], tok=p._slice[0])
 
     @_('first_key_value_pair { subsequent_key_value_pair }')
-    def key_value_pairs(
-        self, p: T_KeyValuePairsProduction
-    ) -> typing.Tuple[List[KeyValuePair], Optional[TrailingComma]]:
+    def key_value_pairs(self, p: T_KeyValuePairsProduction) -> tuple[list[KeyValuePair], TrailingComma | None]:
         ret = [
             p.first_key_value_pair,
         ]
@@ -341,8 +336,8 @@ class JSONParser(Parser):  # type: ignore[misc]
         return node
 
     @_('array_delimiter_seen COMMA { wsc } [ first_array_value ]')
-    def subsequent_array_value(self, p: T_SubsequentArrayValueProduction) -> Union[Value, TrailingComma]:
-        node: Union[Value, TrailingComma]
+    def subsequent_array_value(self, p: T_SubsequentArrayValueProduction) -> Value | TrailingComma:
+        node: Value | TrailingComma
         if p.first_array_value:
             node = p.first_array_value
             for wsc in p.wsc:
@@ -354,7 +349,7 @@ class JSONParser(Parser):  # type: ignore[misc]
         return node
 
     @_('first_array_value { subsequent_array_value }')
-    def array_values(self, p: T_ArrayValuesProduction) -> typing.Tuple[List[Value], Optional[TrailingComma]]:
+    def array_values(self, p: T_ArrayValuesProduction) -> tuple[list[Value], TrailingComma | None]:
         ret = [
             p.first_array_value,
         ]
@@ -413,7 +408,7 @@ class JSONParser(Parser):  # type: ignore[misc]
         return Identifier(name=name, raw_value=raw_value, tok=p._slice[0])
 
     @_('seen_key identifier', 'seen_key string')
-    def key(self, p: T_KeyProduction) -> Union[Identifier, DoubleQuotedString, SingleQuotedString]:
+    def key(self, p: T_KeyProduction) -> Identifier | DoubleQuotedString | SingleQuotedString:
         node = p[1]
         return node
 
@@ -518,7 +513,7 @@ class JSONParser(Parser):  # type: ignore[misc]
         return SingleQuotedString(contents, raw_value=raw_value, tok=p._slice[0])
 
     @_('double_quoted_string', 'single_quoted_string')
-    def string(self, p: T_StringProduction) -> Union[SingleQuotedString, DoubleQuotedString]:
+    def string(self, p: T_StringProduction) -> SingleQuotedString | DoubleQuotedString:
         return p[0]
 
     @_('TRUE')
@@ -543,30 +538,30 @@ class JSONParser(Parser):  # type: ignore[misc]
     )
     def value(
         self, p: T_ValueProduction
-    ) -> Union[
-        DoubleQuotedString,
-        SingleQuotedString,
-        JSONObject,
-        JSONArray,
-        BooleanLiteral,
-        NullLiteral,
-        Infinity,
-        Integer,
-        Float,
-        NaN,
-    ]:
+    ) -> (
+        DoubleQuotedString
+        | SingleQuotedString
+        | JSONObject
+        | JSONArray
+        | BooleanLiteral
+        | NullLiteral
+        | Infinity
+        | Integer
+        | Float
+        | NaN
+    ):
         node = p[0]
         return node
 
     @_('UNTERMINATED_SINGLE_QUOTE_STRING', 'UNTERMINATED_DOUBLE_QUOTE_STRING')  # type: ignore[no-redef]
-    def string(self, p: T_StringTokenProduction) -> Union[SingleQuotedString, DoubleQuotedString]:
+    def string(self, p: T_StringTokenProduction) -> SingleQuotedString | DoubleQuotedString:
         self.error(p._slice[0])
         raw = p[0]
         if raw.startswith('"'):
             return DoubleQuotedString(raw[1:], raw_value=raw)
         return SingleQuotedString(raw[1:], raw_value=raw)
 
-    def error(self, token: Optional[JSON5Token]) -> Optional[JSON5Token]:
+    def error(self, token: JSON5Token | None) -> JSON5Token | None:
         if token:
             if self.expecting:
                 expected = self.expecting[-1]

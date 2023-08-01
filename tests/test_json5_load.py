@@ -2,12 +2,10 @@ import math
 from io import StringIO
 
 import pytest
-from sly.lex import LexError
 
 from json5.loader import JsonIdentifier
 from json5.loader import load
 from json5.loader import loads
-from json5.utils import JSON5DecodeError
 
 
 def test_object_string_key_value_pair():

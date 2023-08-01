@@ -4,7 +4,6 @@ from io import StringIO
 
 from json5 import dump
 from json5 import dumps
-from json5 import loads
 from json5.dumper import ModelDumper
 from json5.model import Integer
 from json5.model import UnaryOp

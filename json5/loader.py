@@ -4,10 +4,7 @@ import logging
 import typing
 from abc import abstractmethod
 from typing import Callable
-from typing import Dict
-from typing import List
 from typing import Literal
-from typing import Tuple
 
 from json5.model import *
 from json5.parser import parse_source
@@ -21,23 +18,23 @@ logger = logging.getLogger(__name__)
 class Environment:
     def __init__(
         self,
-        object_hook: Optional[Callable[[Dict[typing.Any, typing.Any]], typing.Any]] = None,
-        parse_float: Optional[Callable[[str], typing.Any]] = None,
-        parse_int: Optional[Callable[[str], typing.Any]] = None,
-        parse_constant: Optional[Callable[[Literal['-Infinity', 'Infinity', 'NaN']], typing.Any]] = None,
+        object_hook: Callable[[dict[typing.Any, typing.Any]], typing.Any] | None = None,
+        parse_float: Callable[[str], typing.Any] | None = None,
+        parse_int: Callable[[str], typing.Any] | None = None,
+        parse_constant: Callable[[Literal['-Infinity', 'Infinity', 'NaN']], typing.Any] | None = None,
         strict: bool = True,
-        object_pairs_hook: Optional[Callable[[List[Tuple[Union[str, JsonIdentifier], typing.Any]]], typing.Any]] = None,
-        parse_json5_identifiers: Optional[Callable[[JsonIdentifier], typing.Any]] = None,
+        object_pairs_hook: Callable[[list[tuple[Union[str, JsonIdentifier], typing.Any]]], typing.Any] | None = None,
+        parse_json5_identifiers: Callable[[JsonIdentifier], typing.Any] | None = None,
     ):
-        self.object_hook: Optional[Callable[[Dict[typing.Any, typing.Any]], typing.Any]] = object_hook
-        self.parse_float: Optional[Callable[[str], typing.Any]] = parse_float
-        self.parse_int: Optional[Callable[[str], typing.Any]] = parse_int
-        self.parse_constant: Optional[Callable[[Literal['-Infinity', 'Infinity', 'NaN']], typing.Any]] = parse_constant
+        self.object_hook: Callable[[dict[typing.Any, typing.Any]], typing.Any] | None = object_hook
+        self.parse_float: Callable[[str], typing.Any] | None = parse_float
+        self.parse_int: Callable[[str], typing.Any] | None = parse_int
+        self.parse_constant: Callable[[Literal['-Infinity', 'Infinity', 'NaN']], typing.Any] | None = parse_constant
         self.strict: bool = strict
-        self.object_pairs_hook: Optional[
-            Callable[[List[Tuple[Union[str, JsonIdentifier], typing.Any]]], typing.Any]
-        ] = object_pairs_hook
-        self.parse_json5_identifiers: Optional[Callable[[JsonIdentifier], typing.Any]] = parse_json5_identifiers
+        self.object_pairs_hook: None | (
+            Callable[[list[tuple[Union[str, JsonIdentifier], typing.Any]]], typing.Any]
+        ) = object_pairs_hook
+        self.parse_json5_identifiers: Callable[[JsonIdentifier], typing.Any] | None = parse_json5_identifiers
 
 
 class JsonIdentifier(str):
@@ -57,25 +54,23 @@ def load(f: typing.TextIO, **kwargs: typing.Any) -> typing.Any:
 
 
 @typing.overload
-def loads(
-    s: str, *, loader: None
-) -> typing.Union[int, float, str, dict[typing.Any, typing.Any], list[typing.Any], None,]:
+def loads(s: str, *, loader: None) -> int | float | str | dict[typing.Any, typing.Any] | list[typing.Any] | None:
     ...
 
 
 @typing.overload
 def loads(
     s: str, *, loader: DefaultLoader
-) -> typing.Union[int, float, str, dict[typing.Any, typing.Any], list[typing.Any], None,]:
+) -> int | float | str | dict[typing.Any, typing.Any] | list[typing.Any] | None:
     ...
 
 
 @typing.overload
-def loads(s: str, *, loader: typing.Optional[LoaderBase] = None, **kwargs: typing.Any) -> typing.Any:
+def loads(s: str, *, loader: LoaderBase | None = None, **kwargs: typing.Any) -> typing.Any:
     ...
 
 
-def loads(s: str, *, loader: typing.Optional[LoaderBase] = None, **kwargs: typing.Any) -> typing.Any:
+def loads(s: str, *, loader: LoaderBase | None = None, **kwargs: typing.Any) -> typing.Any:
     """
     Take a string of JSON text and deserialize it
 
@@ -97,7 +92,7 @@ def loads(s: str, *, loader: typing.Optional[LoaderBase] = None, **kwargs: typin
 
 
 class LoaderBase:
-    def __init__(self, env: typing.Optional[Environment] = None, **env_kwargs: typing.Any):
+    def __init__(self, env: Environment | None = None, **env_kwargs: typing.Any):
         if env is None:
             env = Environment(**env_kwargs)
         self.env: Environment = env

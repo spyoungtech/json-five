@@ -6,10 +6,6 @@ import math
 import typing
 from abc import abstractmethod
 from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Union
 
 from .loader import JsonIdentifier
 from .utils import singledispatchmethod
@@ -22,7 +18,7 @@ class Environment:
         self.indent_level: int = 0
         self.indent: int = 0
 
-    def write(self, s: str, indent: Optional[int] = None) -> None:
+    def write(self, s: str, indent: int | None = None) -> None:
         if indent is None:
             indent = self.indent_level
         whitespace = ' ' * self.indent * indent
@@ -35,19 +31,19 @@ def dump(obj: Any, f: typing.TextIO, **kwargs: Any) -> int:
     return f.write(text)
 
 
-def dumps(obj: Any, dumper: Optional[BaseDumper] = None, indent: int = 0) -> str:
+def dumps(obj: Any, dumper: BaseDumper | None = None, indent: int = 0) -> str:
     env = Environment()
     env.indent = indent
     if dumper is None:
         dumper = DefaultDumper(env=env)
-    model = dumper.dump(obj)
+    dumper.dump(obj)
     dumper.env.outfile.seek(0)
     ret: str = dumper.env.outfile.read()
     return ret
 
 
 class BaseDumper:
-    def __init__(self, env: Optional[Environment] = None):
+    def __init__(self, env: Environment | None = None):
         if env is None:
             env = Environment()
         self.env = env
@@ -70,7 +66,7 @@ class DefaultDumper(BaseDumper):
     to_json = dump.register
 
     @to_json(dict)
-    def dict_to_json(self, d: Dict[Any, Any]) -> Any:
+    def dict_to_json(self, d: dict[Any, Any]) -> Any:
         self.env.write('{', indent=0)
         if self.env.indent:
             self.env.write('\n')
@@ -109,13 +105,13 @@ class DefaultDumper(BaseDumper):
         self.env.write(json.dumps(s), indent=0)
 
     @to_json(list)
-    def list_to_json(self, l: List[Any]) -> Any:
+    def list_to_json(self, the_list: list[Any]) -> Any:
         self.env.write('[', indent=0)
         if self.env.indent:
             self.env.indent_level += 1
             self.env.write('\n', indent=0)
-        list_length = len(l)
-        for index, item in enumerate(l, start=1):
+        list_length = len(the_list)
+        for index, item in enumerate(the_list, start=1):
             if self.env.indent:
                 self.env.write('')
             self.dump(item)
@@ -155,7 +151,7 @@ class ModelDumper:
     Dump a model to a JSON string
     """
 
-    def __init__(self, env: Optional[Environment] = None):
+    def __init__(self, env: Environment | None = None):
         #  any provided environment is ignored
         self.env = Environment()
 
@@ -177,7 +173,7 @@ class ModelDumper:
             else:
                 raise ValueError(f"Did not expect {type(wsc)}")
 
-    def process_leading_wsc(self, node: Union[JSONObject, JSONArray]) -> None:
+    def process_leading_wsc(self, node: JSONObject | JSONArray) -> None:
         for wsc in node.leading_wsc:
             if isinstance(wsc, Comment):
                 self.dump(wsc)
@@ -257,7 +253,7 @@ class ModelDumper:
         self.process_wsc_after(node)
 
     @to_json(String)
-    def string_to_json(self, node: Union[SingleQuotedString, DoubleQuotedString]) -> Any:
+    def string_to_json(self, node: SingleQuotedString | DoubleQuotedString) -> Any:
         self.process_wsc_before(node)
         self.env.write(node.raw_value)  # The original value, including any escape sequences or line continuations
         self.process_wsc_after(node)
@@ -321,23 +317,23 @@ class Modelizer:
     to_model = modelize.register
 
     @to_model(str)
-    def str_to_model(self, s: str) -> Union[SingleQuotedString, DoubleQuotedString]:
+    def str_to_model(self, s: str) -> SingleQuotedString | DoubleQuotedString:
         if repr(s).startswith("'"):
             return SingleQuotedString(s, raw_value=repr(s))
         else:
             return DoubleQuotedString(s, raw_value=repr(s))
 
     @to_model(dict)
-    def dict_to_model(self, d: Dict[Any, Any]) -> JSONObject:
-        kvps: List[KeyValuePair] = []
+    def dict_to_model(self, d: dict[Any, Any]) -> JSONObject:
+        kvps: list[KeyValuePair] = []
         for key, value in d.items():
             kvp = KeyValuePair(key=self.modelize(key), value=self.modelize(value))  # type: ignore[arg-type]
             kvps.append(kvp)
         return JSONObject(*kvps)
 
     @to_model(list)
-    def list_to_model(self, lst: List[Any]) -> JSONArray:
-        list_values: List[Value] = []
+    def list_to_model(self, lst: list[Any]) -> JSONArray:
+        list_values: list[Value] = []
         for v in lst:
             list_values.append(self.modelize(v))  # type: ignore[arg-type]
         return JSONArray(*list_values)
@@ -347,7 +343,7 @@ class Modelizer:
         return Integer(str(i))
 
     @to_model(float)
-    def float_to_model(self, f: float) -> Union[Infinity, NaN, Float, UnaryOp]:
+    def float_to_model(self, f: float) -> Infinity | NaN | Float | UnaryOp:
         if f == math.inf:
             return Infinity()
         elif f == -math.inf:

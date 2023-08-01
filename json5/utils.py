@@ -6,8 +6,6 @@ from functools import update_wrapper
 from json import JSONDecodeError
 from typing import Any
 from typing import Callable
-from typing import Tuple
-from typing import Type
 
 try:
     from functools import singledispatchmethod
@@ -31,7 +29,7 @@ if typing.TYPE_CHECKING:
 
 
 class JSON5DecodeError(JSONDecodeError):
-    def __init__(self, msg: str, token: typing.Optional[JSON5Token]):
+    def __init__(self, msg: str, token: JSON5Token | None):
         lineno = getattr(token, 'lineno', 0)
         index = getattr(token, 'index', 0)
         doc = getattr(token, 'doc', None)
@@ -45,5 +43,5 @@ class JSON5DecodeError(JSONDecodeError):
             self.msg = msg
             self.lineno = lineno
 
-    def __reduce__(self) -> Tuple[Type[JSON5DecodeError], Tuple[str, typing.Optional[JSON5Token]]]:
+    def __reduce__(self) -> tuple[type[JSON5DecodeError], tuple[str, JSON5Token | None]]:
         return self.__class__, (self.msg, self.token)

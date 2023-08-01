@@ -1,11 +1,7 @@
-import math
-
 import pytest
-from sly.lex import LexError
 
 from json5.dumper import dumps
 from json5.dumper import ModelDumper
-from json5.loader import JsonIdentifier
 from json5.loader import loads
 from json5.loader import ModelLoader
 
