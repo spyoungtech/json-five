@@ -5,3 +5,16 @@ repos:
     -   id: check-yaml
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
+-   repo: https://github.com/asottile/reorder-python-imports
+    rev: v3.10.0
+    hooks:
+    -   id: reorder-python-imports
+
+-   repo: https://github.com/psf/black
+    rev: '23.7.0'
+    hooks:
+    -   id: black
+        args:
+            - "-S"
+            - "-l"
+            - "120"

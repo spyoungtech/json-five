@@ -1,11 +1,18 @@
 from __future__ import annotations
+
 import typing
-from typing import Callable, Any, Tuple, Type
-from functools import singledispatch, update_wrapper
+from functools import singledispatch
+from functools import update_wrapper
 from json import JSONDecodeError
+from typing import Any
+from typing import Callable
+from typing import Tuple
+from typing import Type
+
 try:
     from functools import singledispatchmethod
 except ImportError:
+
     def singledispatchmethod(func: Callable[..., Any]) -> Any:  # type: ignore[no-redef]
         dispatcher = singledispatch(func)
 
@@ -15,6 +22,7 @@ except ImportError:
         wrapper.register = dispatcher.register  # type: ignore[attr-defined]
         update_wrapper(wrapper, func)
         return wrapper
+
 
 __all__ = ['singledispatchmethod', 'JSON5DecodeError']
 

@@ -1,34 +1,41 @@
 import math
 
 import pytest
-from json5.loader import loads, JsonIdentifier, ModelLoader
 from sly.lex import LexError
-from json5.dumper import dumps, ModelDumper
+
+from json5.dumper import dumps
+from json5.dumper import ModelDumper
+from json5.loader import JsonIdentifier
+from json5.loader import loads
+from json5.loader import ModelLoader
 
 
-@pytest.mark.parametrize('json_string', [
-"""{"foo":"bar"}""",
-"""{"foo": "bar"}""",
-"""{"foo":"bar","bacon":"eggs"}""",
-"""{"foo":  "bar", "bacon" :  "eggs"}""",
-"""["foo","bar","baz"]""",
-"""[ "foo", "bar"  , "baz"   ]""",
-"""{"foo":\n "bar"\n}""",
-"""{"foo": {"bacon": "eggs"}}""",
-"""   {"foo":"bar"}""",
-"""{"foo": "bar"}   """,
-"""{'foo': 'bar'}""",
-"""{"foo": 'bar'}""",
-"""{"foo": "bar",}""",
-"""["foo","bar", "baz",]""",
-"""["foo", "bar", "baz", ]""",
-"""["foo", "bar", "baz"  ,]""",
-"""[["foo"], ["foo","bar"], "baz"]""",
-"""{unquoted: "foo"}""",
-"""{unquoted: "foo"}""",
-"""["foo"]""",
-"""["foo" , ]""",
-])
+@pytest.mark.parametrize(
+    'json_string',
+    [
+        """{"foo":"bar"}""",
+        """{"foo": "bar"}""",
+        """{"foo":"bar","bacon":"eggs"}""",
+        """{"foo":  "bar", "bacon" :  "eggs"}""",
+        """["foo","bar","baz"]""",
+        """[ "foo", "bar"  , "baz"   ]""",
+        """{"foo":\n "bar"\n}""",
+        """{"foo": {"bacon": "eggs"}}""",
+        """   {"foo":"bar"}""",
+        """{"foo": "bar"}   """,
+        """{'foo': 'bar'}""",
+        """{"foo": 'bar'}""",
+        """{"foo": "bar",}""",
+        """["foo","bar", "baz",]""",
+        """["foo", "bar", "baz", ]""",
+        """["foo", "bar", "baz"  ,]""",
+        """[["foo"], ["foo","bar"], "baz"]""",
+        """{unquoted: "foo"}""",
+        """{unquoted: "foo"}""",
+        """["foo"]""",
+        """["foo" , ]""",
+    ],
+)
 def test_round_trip_model_load_dump(json_string):
     assert dumps(loads(json_string, loader=ModelLoader()), dumper=ModelDumper()) == json_string
 
@@ -134,6 +141,7 @@ def test_hexadecimal_load():
     positiveHex: 0xdecaf,
     negativeHex: -0xC0FFEE,}"""
     assert dumps(loads(json_string, loader=ModelLoader()), dumper=ModelDumper()) == json_string
+
 
 def test_load_empty_array_with_whitespace():
     json_string = "{   }"

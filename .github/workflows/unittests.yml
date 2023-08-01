@@ -21,6 +21,7 @@ jobs:
           python -m pip install -r requirements-dev.txt
           python -m pip install .
           python -m pip install tox
+          git clone https://github.com/json5/json5-tests.git
 
       - name: Test with coverage/pytest
         env:

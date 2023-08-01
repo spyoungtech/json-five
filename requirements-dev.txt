@@ -3,3 +3,4 @@ regex
 pytest
 mypy
 coverage
+types-regex

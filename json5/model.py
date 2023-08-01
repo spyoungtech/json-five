@@ -1,6 +1,12 @@
 from __future__ import annotations
+
 import math
-from typing import Optional, Union, List, Literal, Any
+from typing import Any
+from typing import List
+from typing import Literal
+from typing import Optional
+from typing import Union
+
 from .tokenizer import JSON5Token
 
 __all__ = [
@@ -29,8 +35,10 @@ __all__ = [
     'BlockComment',
 ]
 
+
 class Node:
     excluded_names = ['excluded_names', 'wsc_before', 'wsc_after', 'leading_wsc']
+
     def __init__(self) -> None:
         # Whitespace/Comments before/after the node
         self.wsc_before: List[Union[str, Comment]] = []
@@ -41,7 +49,8 @@ class Node:
             f"{self.__class__.__name__}("
             + ", ".join(
                 "{key}={value}".format(key=key, value=repr(value))
-                for key, value in self.__dict__.items() if key not in self.excluded_names
+                for key, value in self.__dict__.items()
+                if key not in self.excluded_names
             )
             + ")"
         )
@@ -58,12 +67,19 @@ class JSONText(Node):
 class Value(Node):
     pass
 
+
 class Key(Node):
     ...
 
 
 class JSONObject(Value):
-    def __init__(self, *key_value_pairs: KeyValuePair, trailing_comma: Optional[TrailingComma] = None, leading_wsc: Optional[List[Union[str, Comment]]] = None, tok: Optional[JSON5Token] = None):
+    def __init__(
+        self,
+        *key_value_pairs: KeyValuePair,
+        trailing_comma: Optional[TrailingComma] = None,
+        leading_wsc: Optional[List[Union[str, Comment]]] = None,
+        tok: Optional[JSON5Token] = None,
+    ):
         kvps = list(key_value_pairs)
         for kvp in kvps:
             assert isinstance(kvp, KeyValuePair), f"Expected key value pair, got {type(kvp)}"
@@ -76,7 +92,13 @@ class JSONObject(Value):
 
 
 class JSONArray(Value):
-    def __init__(self, *values: Value, trailing_comma: Optional[TrailingComma] = None, leading_wsc: Optional[List[Union[str, Comment]]] = None, tok: Optional[JSON5Token] = None):
+    def __init__(
+        self,
+        *values: Value,
+        trailing_comma: Optional[TrailingComma] = None,
+        leading_wsc: Optional[List[Union[str, Comment]]] = None,
+        tok: Optional[JSON5Token] = None,
+    ):
         vals = list(values)
         for value in vals:
             assert isinstance(value, Value), f"Was expecting object with type Value. Got {type(value)}"
@@ -154,8 +176,6 @@ class Float(Number):
         super().__init__()
 
 
-
-
 class Infinity(Number):
     def __init__(self, negative: bool = False, tok: Optional[JSON5Token] = None):
         self.negative: bool = negative
@@ -173,6 +193,7 @@ class Infinity(Number):
         else:
             return 'Infinity'
 
+
 class NaN(Number):
     def __init__(self, tok: Optional[JSON5Token] = None):
         self.tok: Optional[JSON5Token] = tok
@@ -186,8 +207,10 @@ class NaN(Number):
     def const(self) -> Literal['NaN']:
         return 'NaN'
 
+
 class String(Value, Key):
     ...
+
 
 class DoubleQuotedString(String):
     def __init__(self, characters: str, raw_value: str, tok: Optional[JSON5Token] = None):
@@ -219,9 +242,11 @@ class BooleanLiteral(Value):
 
 class NullLiteral(Value):
     value = None
+
     def __init__(self, tok: Optional[JSON5Token] = None):
         self.tok: Optional[JSON5Token] = None
         super().__init__()
+
 
 class UnaryOp(Value):
     def __init__(self, op: Literal['-', '+'], value: Number, tok: Optional[JSON5Token] = None):
@@ -232,10 +257,12 @@ class UnaryOp(Value):
         self.tok: Optional[JSON5Token] = tok
         super().__init__()
 
+
 class TrailingComma(Node):
     def __init__(self, tok: Optional[JSON5Token] = None):
         self.tok = tok
         super().__init__()
+
 
 class Comment(Node):
     def __init__(self, value: str, tok: Optional[JSON5Token] = None):
@@ -247,6 +274,7 @@ class Comment(Node):
 
 class LineComment(Comment):
     ...
+
 
 class BlockComment(Comment):
     ...

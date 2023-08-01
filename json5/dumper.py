@@ -1,21 +1,26 @@
 from __future__ import annotations
-from typing import Dict, Any, Optional, List, Union
+
+import io
+import json
+import math
 import typing
 from abc import abstractmethod
-import math
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Union
+
 from .loader import JsonIdentifier
 from .utils import singledispatchmethod
 from json5.model import *
-from collections import UserDict
-import json
-import io
+
 
 class Environment:
     def __init__(self) -> None:
         self.outfile: typing.TextIO = io.StringIO()
         self.indent_level: int = 0
         self.indent: int = 0
-
 
     def write(self, s: str, indent: Optional[int] = None) -> None:
         if indent is None:
@@ -40,6 +45,7 @@ def dumps(obj: Any, dumper: Optional[BaseDumper] = None, indent: int = 0) -> str
     ret: str = dumper.env.outfile.read()
     return ret
 
+
 class BaseDumper:
     def __init__(self, env: Optional[Environment] = None):
         if env is None:
@@ -51,10 +57,12 @@ class BaseDumper:
     def dump(self, obj: Any) -> Any:
         return NotImplemented
 
+
 class DefaultDumper(BaseDumper):
     """
     Dump Python objects to a JSON string
     """
+
     @singledispatchmethod
     def dump(self, obj: Any) -> Any:
         raise NotImplementedError(f"Cannot dump node {repr(obj)}")
@@ -88,7 +96,6 @@ class DefaultDumper(BaseDumper):
         else:
             self.env.write('}', indent=0)
 
-
     @to_json(int)
     def int_to_json(self, i: int) -> Any:
         self.env.write(str(i), indent=0)
@@ -100,7 +107,6 @@ class DefaultDumper(BaseDumper):
     @to_json(str)
     def str_to_json(self, s: str) -> Any:
         self.env.write(json.dumps(s), indent=0)
-
 
     @to_json(list)
     def list_to_json(self, l: List[Any]) -> Any:
@@ -124,7 +130,6 @@ class DefaultDumper(BaseDumper):
             self.env.indent_level -= 1
         self.env.write(']')
 
-
     @to_json(float)
     def float_to_json(self, f: float) -> Any:
         if f == math.inf:
@@ -144,10 +149,12 @@ class DefaultDumper(BaseDumper):
     def none_to_json(self, _: Any) -> Any:
         self.env.write('null', indent=0)
 
+
 class ModelDumper:
     """
     Dump a model to a JSON string
     """
+
     def __init__(self, env: Optional[Environment] = None):
         #  any provided environment is ignored
         self.env = Environment()
@@ -301,10 +308,12 @@ class ModelDumper:
         self.env.write('NaN')
         self.process_wsc_after(node)
 
+
 class Modelizer:
     """
     Turn Python objects into a model
     """
+
     @singledispatchmethod
     def modelize(self, obj: Any) -> Node:
         raise NotImplementedError(f"Cannot modelize object of type {type(obj)}")
@@ -336,7 +345,6 @@ class Modelizer:
     @to_model(int)
     def int_to_model(self, i: int) -> Integer:
         return Integer(str(i))
-
 
     @to_model(float)
     def float_to_model(self, f: float) -> Union[Infinity, NaN, Float, UnaryOp]:

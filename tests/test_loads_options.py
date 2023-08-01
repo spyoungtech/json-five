@@ -1,6 +1,7 @@
 import json
-import json5
 from decimal import Decimal
+
+import json5
 
 
 def int_plus_one(int_string):
@@ -21,8 +22,10 @@ def const_to_silly(const_string):
 def true_object_hook(d):
     return {k: True for k in d}
 
+
 def true_object_pair_hook(kvpairs):
-    return {k: True for k,v in kvpairs}
+    return {k: True for k, v in kvpairs}
+
 
 def test_parse_int():
     json_string = """{"foo": 5}"""
@@ -32,25 +35,34 @@ def test_parse_int():
 
 def test_parse_float():
     json_string = """{"foo": 5.0}"""
-    assert json5.loads(json_string, parse_float=float_to_decimal) == json.loads(json_string, parse_float=float_to_decimal)
+    assert json5.loads(json_string, parse_float=float_to_decimal) == json.loads(
+        json_string, parse_float=float_to_decimal
+    )
 
 
 def test_parse_constant_nan():
     json_string = """{"foo": NaN}"""
     assert json5.loads(json_string, parse_constant=const_to_silly) == {'foo': 'Something Silly NaN'}
-    assert json5.loads(json_string, parse_constant=const_to_silly) == json.loads(json_string, parse_constant=const_to_silly)
+    assert json5.loads(json_string, parse_constant=const_to_silly) == json.loads(
+        json_string, parse_constant=const_to_silly
+    )
 
 
 def test_parse_constant_positive_infinity():
     json_string = """{"foo": Infinity}"""
     assert json5.loads(json_string, parse_constant=const_to_silly) == {'foo': 'Something Silly Infinity'}
-    assert json5.loads(json_string, parse_constant=const_to_silly) == json.loads(json_string, parse_constant=const_to_silly)
+    assert json5.loads(json_string, parse_constant=const_to_silly) == json.loads(
+        json_string, parse_constant=const_to_silly
+    )
 
 
 def test_parse_constant_negative_infinity():
     json_string = """{"foo": -Infinity}"""
     assert json5.loads(json_string, parse_constant=const_to_silly) == {'foo': 'Something Silly -Infinity'}
-    assert json5.loads(json_string, parse_constant=const_to_silly) == json.loads(json_string, parse_constant=const_to_silly)
+    assert json5.loads(json_string, parse_constant=const_to_silly) == json.loads(
+        json_string, parse_constant=const_to_silly
+    )
+
 
 def test_object_hook():
     json_string = """{"foo": "bar", "bacon": "eggs"}"""
