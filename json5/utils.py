@@ -1,21 +1,27 @@
+from __future__ import annotations
+import typing
+from typing import Callable, Any, Tuple, Type
 from functools import singledispatch, update_wrapper
 from json import JSONDecodeError
 try:
     from functools import singledispatchmethod
 except ImportError:
-    def singledispatchmethod(func):
+    def singledispatchmethod(func: Callable[..., Any]) -> Any:  # type: ignore[no-redef]
         dispatcher = singledispatch(func)
 
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             return dispatcher.dispatch(args[1].__class__)(*args, **kwargs)
 
-        wrapper.register = dispatcher.register
+        wrapper.register = dispatcher.register  # type: ignore[attr-defined]
         update_wrapper(wrapper, func)
         return wrapper
 
+if typing.TYPE_CHECKING:
+    from .tokenizer import JSON5Token
+
 
 class JSON5DecodeError(JSONDecodeError):
-    def __init__(self, msg, token):
+    def __init__(self, msg: str, token: JSON5Token):
         lineno = getattr(token, 'lineno', 0)
         index = getattr(token, 'index', 0)
         doc = getattr(token, 'doc', None)
@@ -29,5 +35,5 @@ class JSON5DecodeError(JSONDecodeError):
             self.msg = msg
             self.lineno = lineno
 
-    def __reduce__(self):
+    def __reduce__(self) -> Tuple[Type[JSON5DecodeError], Tuple[str, JSON5Token]]:
         return self.__class__, (self.msg, self.token)

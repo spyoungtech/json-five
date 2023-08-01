@@ -1,7 +1,7 @@
 import regex as re
 import sys
-from sly import Lexer
-from sly.lex import Token
+from sly import Lexer  # type: ignore
+from sly.lex import Token  # type: ignore
 from json5.utils import JSON5DecodeError
 import logging
 
@@ -84,11 +84,11 @@ class JSONLexer(Lexer):
     INTEGER = r'\d+'
     NAME = r'[\w_\$\\]([\w_\d\$\\\p{Pc}\p{Mn}\p{Mc}\u200C\u200D])*'
 
-    NAME['true'] = TRUE
-    NAME['false'] = FALSE
-    NAME['null'] = NULL
-    NAME['Infinity'] = INFINITY
-    NAME['NaN'] = NAN
+    NAME['true'] = TRUE  # type: ignore[index]
+    NAME['false'] = FALSE  # type: ignore[index]
+    NAME['null'] = NULL  # type: ignore[index]
+    NAME['Infinity'] = INFINITY  # type: ignore[index]
+    NAME['NaN'] = NAN  # type: ignore[index]
 
     UNTERMINATED_DOUBLE_QUOTE_STRING = r'"(?:[^"\\]|\\.)*'
     UNTERMINATED_SINGLE_QUOTE_STRING = r"'(?:[^'\\]|\\.)*"

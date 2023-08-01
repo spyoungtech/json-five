@@ -2,8 +2,8 @@ import regex as re
 
 import sys
 
-from sly import Parser
-from sly.yacc import SlyLogger
+from sly import Parser  # type: ignore
+from sly.yacc import SlyLogger  # type: ignore
 from json5.tokenizer import JSONLexer, tokenize, JSON5Token
 from json5.model import *
 from json5.utils import JSON5DecodeError
@@ -121,7 +121,7 @@ class JSONParser(Parser):
         return BlockComment(p[0], tok=p._slice[0])
 
 
-    @_('LINE_COMMENT')
+    @_('LINE_COMMENT') # type: ignore[no-redef]
     def comment(self, p):
         return LineComment(p[0], tok=p._slice[0])
 
@@ -268,11 +268,11 @@ class JSONParser(Parser):
     def number(self, p):
         return Integer(p[0], tok=p._slice[0])
 
-    @_('FLOAT')
+    @_('FLOAT')  # type: ignore[no-redef]
     def number(self, p):
         return Float(p[0], tok=p._slice[0])
 
-    @_('OCTAL')
+    @_('OCTAL')  # type: ignore[no-redef]
     def number(self, p):
         self.errors.append(JSON5DecodeError("Invalid integer literal. Octals are not allowed", p._slice[0]))
         raw_value = p[0]
@@ -283,11 +283,11 @@ class JSONParser(Parser):
 
 
 
-    @_('INFINITY')
+    @_('INFINITY')  # type: ignore[no-redef]
     def number(self, p):
         return Infinity()
 
-    @_('NAN')
+    @_('NAN')  # type: ignore[no-redef]
     def number(self, p):
         return NaN()
 
@@ -298,18 +298,18 @@ class JSONParser(Parser):
         node = UnaryOp(op='-', value=p.number)
         return node
 
-    @_('PLUS number')
+    @_('PLUS number')  # type: ignore[no-redef]
     def value(self, p):
         node = UnaryOp(op='+', value=p.number)
         return node
 
-    @_('INTEGER EXPONENT',
+    @_('INTEGER EXPONENT',  # type: ignore[no-redef]
        'FLOAT EXPONENT')
     def number(self, p):
         exp_notation = p[1][0]  # e or E
         return Float(p[0]+p[1], exp_notation=exp_notation)
 
-    @_('HEXADECIMAL')
+    @_('HEXADECIMAL')  # type: ignore[no-redef]
     def number(self, p):
         return Integer(p[0], is_hex=True)
 
@@ -376,7 +376,7 @@ class JSONParser(Parser):
     def boolean(self, p):
         return BooleanLiteral(True)
 
-    @_('FALSE')
+    @_('FALSE')  # type: ignore[no-redef]
     def boolean(self, p):
         return BooleanLiteral(False)
 
@@ -384,7 +384,7 @@ class JSONParser(Parser):
     def null(self, p):
         return NullLiteral()
 
-    @_('string',
+    @_('string',  # type: ignore[no-redef]
        'json_object',
        'json_array',
        'boolean',
@@ -394,7 +394,7 @@ class JSONParser(Parser):
         node = p[0]
         return node
 
-    @_('UNTERMINATED_SINGLE_QUOTE_STRING',
+    @_('UNTERMINATED_SINGLE_QUOTE_STRING',  # type: ignore[no-redef]
        'UNTERMINATED_DOUBLE_QUOTE_STRING')
     def string(self, p):
         self.error(p._slice[0])
