@@ -6,7 +6,22 @@ from abc import abstractmethod
 from typing import Callable
 from typing import Literal
 
-from json5.model import *
+from json5.model import BooleanLiteral
+from json5.model import Comment
+from json5.model import DoubleQuotedString
+from json5.model import Float
+from json5.model import Identifier
+from json5.model import Infinity
+from json5.model import Integer
+from json5.model import JSONArray
+from json5.model import JSONObject
+from json5.model import JSONText
+from json5.model import NaN
+from json5.model import Node
+from json5.model import NullLiteral
+from json5.model import SingleQuotedString
+from json5.model import String
+from json5.model import UnaryOp
 from json5.parser import parse_source
 from json5.utils import singledispatchmethod
 
@@ -23,7 +38,7 @@ class Environment:
         parse_int: Callable[[str], typing.Any] | None = None,
         parse_constant: Callable[[Literal['-Infinity', 'Infinity', 'NaN']], typing.Any] | None = None,
         strict: bool = True,
-        object_pairs_hook: Callable[[list[tuple[Union[str, JsonIdentifier], typing.Any]]], typing.Any] | None = None,
+        object_pairs_hook: Callable[[list[tuple[str | JsonIdentifier, typing.Any]]], typing.Any] | None = None,
         parse_json5_identifiers: Callable[[JsonIdentifier], typing.Any] | None = None,
     ):
         self.object_hook: Callable[[dict[typing.Any, typing.Any]], typing.Any] | None = object_hook
@@ -32,7 +47,7 @@ class Environment:
         self.parse_constant: Callable[[Literal['-Infinity', 'Infinity', 'NaN']], typing.Any] | None = parse_constant
         self.strict: bool = strict
         self.object_pairs_hook: None | (
-            Callable[[list[tuple[Union[str, JsonIdentifier], typing.Any]]], typing.Any]
+            Callable[[list[tuple[str | JsonIdentifier, typing.Any]]], typing.Any]
         ) = object_pairs_hook
         self.parse_json5_identifiers: Callable[[JsonIdentifier], typing.Any] | None = parse_json5_identifiers
 
@@ -41,7 +56,18 @@ class JsonIdentifier(str):
     ...
 
 
-def load(f: typing.TextIO, **kwargs: typing.Any) -> typing.Any:
+def load(
+    f: typing.TextIO,
+    *,
+    loader: LoaderBase | None = None,
+    object_hook: Callable[[dict[typing.Any, typing.Any]], typing.Any] | None = None,
+    parse_float: Callable[[str], typing.Any] | None = None,
+    parse_int: Callable[[str], typing.Any] | None = None,
+    parse_constant: Callable[[Literal['-Infinity', 'Infinity', 'NaN']], typing.Any] | None = None,
+    strict: bool = True,
+    object_pairs_hook: Callable[[list[tuple[str | JsonIdentifier, typing.Any]]], typing.Any] | None = None,
+    parse_json5_identifiers: Callable[[JsonIdentifier], typing.Any] | None = None,
+) -> typing.Any:
     """
     Like loads, but takes a file-like object with a read method.
 
@@ -50,27 +76,31 @@ def load(f: typing.TextIO, **kwargs: typing.Any) -> typing.Any:
     :return:
     """
     text = f.read()
-    return loads(text, **kwargs)
+    return loads(
+        text,
+        loader=loader,
+        object_hook=object_hook,
+        parse_float=parse_float,
+        parse_int=parse_int,
+        parse_constant=parse_constant,
+        strict=strict,
+        object_pairs_hook=object_pairs_hook,
+        parse_json5_identifiers=parse_json5_identifiers,
+    )
 
 
-@typing.overload
-def loads(s: str, *, loader: None) -> int | float | str | dict[typing.Any, typing.Any] | list[typing.Any] | None:
-    ...
-
-
-@typing.overload
 def loads(
-    s: str, *, loader: DefaultLoader
-) -> int | float | str | dict[typing.Any, typing.Any] | list[typing.Any] | None:
-    ...
-
-
-@typing.overload
-def loads(s: str, *, loader: LoaderBase | None = None, **kwargs: typing.Any) -> typing.Any:
-    ...
-
-
-def loads(s: str, *, loader: LoaderBase | None = None, **kwargs: typing.Any) -> typing.Any:
+    s: str,
+    *,
+    loader: LoaderBase | None = None,
+    object_hook: Callable[[dict[typing.Any, typing.Any]], typing.Any] | None = None,
+    parse_float: Callable[[str], typing.Any] | None = None,
+    parse_int: Callable[[str], typing.Any] | None = None,
+    parse_constant: Callable[[Literal['-Infinity', 'Infinity', 'NaN']], typing.Any] | None = None,
+    strict: bool = True,
+    object_pairs_hook: Callable[[list[tuple[str | JsonIdentifier, typing.Any]]], typing.Any] | None = None,
+    parse_json5_identifiers: Callable[[JsonIdentifier], typing.Any] | None = None,
+) -> typing.Any:
     """
     Take a string of JSON text and deserialize it
 
@@ -82,12 +112,21 @@ def loads(s: str, *, loader: LoaderBase | None = None, **kwargs: typing.Any) -> 
     :param parse_constant: same meaning as in ``json.loads``
     :param strict: same meaning as in ``json.loads`` (currently has no effect)
     :param object_pairs_hook: same meaning as in ``json.loads``
+    :param parse_json5_identifiers: callable that is passed a JsonIdentifer. The return value of the callable is used to load JSON Identifiers (unquoted keys) in JSON5 objects
     :return:
     """
     model = parse_source(s)
     # logger.debug('Model is %r', model)
     if loader is None:
-        loader = DefaultLoader(**kwargs)
+        loader = DefaultLoader(
+            object_hook=object_hook,
+            parse_float=parse_float,
+            parse_int=parse_int,
+            parse_constant=parse_constant,
+            strict=strict,
+            object_pairs_hook=object_pairs_hook,
+            parse_json5_identifiers=parse_json5_identifiers,
+        )
     return loader.load(model)
 
 
@@ -183,7 +222,7 @@ class DefaultLoader(LoaderBase):
             return value
 
     @to_python(String)
-    def string_to_python(self, node: Union[DoubleQuotedString, SingleQuotedString]) -> str:
+    def string_to_python(self, node: DoubleQuotedString | SingleQuotedString) -> str:
         logger.debug('string_to_python evaluating node %r', node)
         ret: str = node.characters
         return ret
