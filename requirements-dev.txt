@@ -1,0 +1,5 @@
+sly
+regex
+pytest
+mypy
+coverage
