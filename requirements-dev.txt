@@ -1,0 +1,6 @@
+sly
+regex
+pytest
+mypy
+coverage
+types-regex

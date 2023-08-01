@@ -1,11 +1,11 @@
 import math
-
-import pytest
-from json5.loader import loads, JsonIdentifier, load
-from sly.lex import LexError
 from io import StringIO
 
-from json5.utils import JSON5DecodeError
+import pytest
+
+from json5.loader import JsonIdentifier
+from json5.loader import load
+from json5.loader import loads
 
 
 def test_object_string_key_value_pair():
@@ -56,6 +56,7 @@ def test_object_with_multiline_comment():
     }"""
     assert loads(json_string) == {"foo": "bar"}
 
+
 def test_array_load_with_line_comment():
     json_string = """[ // line comment
     "foo", "bar"
@@ -68,7 +69,6 @@ def test_array_with_multiline_comment():
     */ "foo", "bar"
     ]"""
     assert loads(json_string) == ["foo", "bar"]
-
 
 
 def test_nested_object():
@@ -198,7 +198,14 @@ def test_empty_array():
 
 @pytest.mark.parametrize(
     "json_string",
-    ['{"foo": "bar", "bar" "baz"', '["foo" "bar"]', "[,]", "{,}", "!", '{"foo": "bar" "bacon": "eggs"}',],
+    [
+        '{"foo": "bar", "bar" "baz"',
+        '["foo" "bar"]',
+        "[,]",
+        "{,}",
+        "!",
+        '{"foo": "bar" "bacon": "eggs"}',
+    ],
 )
 def test_invalid_json(json_string):
     with pytest.raises(Exception):
@@ -237,17 +244,21 @@ def test_boolean_load_true():
     json_string = """{foo: true}"""
     assert loads(json_string) == {'foo': True}
 
+
 def test_boolean_load_false():
     json_string = """{foo: false}"""
     assert loads(json_string) == {'foo': False}
+
 
 def test_null_load():
     json_string = """{foo: null}"""
     assert loads(json_string) == {'foo': None}
 
+
 def test_unary_plus_load():
     json_string = """{foo: +12 }"""
     assert loads(json_string) == {'foo': 12}
+
 
 def test_load_from_file():
     f = StringIO('{foo: 123}')
@@ -263,17 +274,21 @@ def test_load_empty_object_wtih_whitespace():
     json_string = "[   ]"
     assert loads(json_string) == []
 
+
 def test_load_empty_object_with_comments():
     json_string = "{ // foo \n}"
     assert loads(json_string) == {}
+
 
 def test_load_empty_array_with_comments():
     json_string = "[ // foo \n]"
     assert loads(json_string) == []
 
+
 def test_load_array_with_comment_before_additional_element():
     json_string = "['foo',/* comment */ 'bar', // foo\n'baz']"
     assert loads(json_string) == ['foo', 'bar', 'baz']
+
 
 def test_load_object_with_additional_comments():
     json_string = """{
@@ -289,8 +304,10 @@ def test_load_latin_escape():
     json_string = r'"\x5C"'
     assert loads(json_string) == '\\'
 
+
 def test_latin_escape_backslash_is_not_real_backslack():
     assert loads("""'\\x5C01'""") == "\\01"
+
 
 def test_escape_unicode():
     json_string = """
@@ -299,6 +316,7 @@ def test_escape_unicode():
     }
     """
     assert loads(json_string) == {"sig\u03A3ma": "\u03A3 is the sum of all things"}
+
 
 def test_load_identifier_with_connector_punctuation():
     json_string = """{foo⁀bar: 1}"""

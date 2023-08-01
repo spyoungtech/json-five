@@ -1,9 +1,12 @@
-from json5 import dumps, loads, dump
-from json5.dumper import ModelDumper
-from json5.model import UnaryOp, Integer
 import json
 import math
 from io import StringIO
+
+from json5 import dump
+from json5 import dumps
+from json5.dumper import ModelDumper
+from json5.model import Integer
+from json5.model import UnaryOp
 
 
 def test_json_dump_empty_object():
@@ -38,6 +41,7 @@ def test_dump_indent_same_as_json():
     }
     assert dumps(d, indent=4) == json.dumps(d, indent=4)
 
+
 def test_dump_boolean():
     d = {'foo': True}
     assert dumps(d) == json.dumps(d)
@@ -52,8 +56,10 @@ def test_dump_none():
     d = {'foo': None}
     assert dumps(d) == json.dumps(d)
 
+
 def test_dump_unary_plus():
     assert dumps(UnaryOp('+', Integer('1')), dumper=ModelDumper()) == '+1'
+
 
 def test_dump_file():
     f = StringIO()
