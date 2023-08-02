@@ -18,8 +18,18 @@ you can provide the following arguments that have the same meaning as in ``json.
 This is convenient if you have existing code that uses these arguments with the ``json`` module, but want to also
 support JSON5. These options are also useful as a simple way to customize parsing of json types.
 
-However, this package does not support the ``cls`` keyword. If you want to implement custom serializers/deserializers,
-read on about custom loaders/dumpers
+Additionally, a new hook keyword argument, ``parse_json5_identifiers``, is available to help users control the
+output of parsing identifiers. By default, JSON5 Identifiers in object keys are returned as a ``JsonIdentifier`` object,
+which is a subclass of ``str`` (meaning it's compatible anywhere ``str`` is accepted).
+This helps keep keys the same round-trip, rather than converting unquoted identifiers into quoted strings, such that
+``dumps(loads(text)) == text`` (in this case).
+
+You can change this behavior with the ``parse_json5_identifiers`` keyword argument with a callable that receives the `JsonIdentifier` object
+and its return value is used instead. For example, you can specify ``parse_json5_identifiers=str`` to convert identifiers
+to normal strings, such that ``dumps(loads('{foo: "bar"}')) == '{"foo": "bar"}'``.
+
+However, this package does not support the ``cls`` keyword found in the standard library ``json`` module.
+If you want to implement custom serializers/deserializers, read on about custom loaders/dumpers.
 
 
 Custom Loaders and Dumpers
