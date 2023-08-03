@@ -22,14 +22,20 @@ class JSON5Token(Token):  # type: ignore[misc]
     '''
 
     def __init__(self, tok: Token, doc: str):
-        self.type = tok.type
-        self.value = tok.value
-        self.lineno = tok.lineno
-        self.index = tok.index
-        self.doc = doc
-        self.end = getattr(tok, 'end', None)
+        self.type: str | None = tok.type
+        self.value: str = tok.value
+        self.lineno: int = tok.lineno
+        self.index: int = tok.index
+        self.doc: str = doc
+        self.end: int = tok.end
 
     __slots__ = ('type', 'value', 'lineno', 'index', 'doc', 'end')
+
+    def __str__(self) -> str:
+        if self.value:
+            return self.value
+        else:
+            return ''
 
     def __repr__(self) -> str:
         return f'JSON5Token(type={self.type!r}, value={self.value!r}, lineno={self.lineno}, index={self.index}, end={self.end})'
@@ -125,3 +131,9 @@ def tokenize(text: str) -> Generator[JSON5Token, None, None]:
     lexer = JSONLexer()
     tokens = lexer.tokenize(text)
     return tokens
+
+
+def reversed_enumerate(tokens: typing.Sequence[JSON5Token]) -> typing.Generator[tuple[int, JSON5Token], None, None]:
+    for i in reversed(range(len(tokens))):
+        tok = tokens[i]
+        yield i, tok
