@@ -7,23 +7,23 @@ from functools import singledispatchmethod
 from typing import Callable
 from typing import Literal
 
-from json5.model import BooleanLiteral
-from json5.model import Comment
-from json5.model import DoubleQuotedString
-from json5.model import Float
-from json5.model import Identifier
-from json5.model import Infinity
-from json5.model import Integer
-from json5.model import JSONArray
-from json5.model import JSONObject
-from json5.model import JSONText
-from json5.model import NaN
-from json5.model import Node
-from json5.model import NullLiteral
-from json5.model import SingleQuotedString
-from json5.model import String
-from json5.model import UnaryOp
-from json5.parser import parse_source
+from .model import BooleanLiteral
+from .model import Comment
+from .model import DoubleQuotedString
+from .model import Float
+from .model import Identifier
+from .model import Infinity
+from .model import Integer
+from .model import JSONArray
+from .model import JSONObject
+from .model import JSONText
+from .model import NaN
+from .model import Node
+from .model import NullLiteral
+from .model import SingleQuotedString
+from .model import String
+from .model import UnaryOp
+from .parser import parse_source
 
 logger = logging.getLogger(__name__)
 # logger.setLevel(level=logging.DEBUG)

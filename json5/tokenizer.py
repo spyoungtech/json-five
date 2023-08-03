@@ -9,7 +9,7 @@ import regex as re
 from sly import Lexer  # type: ignore
 from sly.lex import Token  # type: ignore
 
-from json5.utils import JSON5DecodeError
+from .utils import JSON5DecodeError
 
 logger = logging.getLogger(__name__)
 # logger.addHandler(logging.StreamHandler(stream=sys.stderr))

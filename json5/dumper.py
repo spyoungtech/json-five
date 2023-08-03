@@ -9,7 +9,27 @@ from functools import singledispatchmethod
 from typing import Any
 
 from .loader import JsonIdentifier
-from json5.model import *
+from .model import BlockComment
+from .model import BooleanLiteral
+from .model import Comment
+from .model import DoubleQuotedString
+from .model import Float
+from .model import Identifier
+from .model import Infinity
+from .model import Integer
+from .model import JSONArray
+from .model import JSONObject
+from .model import JSONText
+from .model import KeyValuePair
+from .model import LineComment
+from .model import NaN
+from .model import Node
+from .model import NullLiteral
+from .model import SingleQuotedString
+from .model import String
+from .model import TrailingComma
+from .model import UnaryOp
+from .model import Value
 
 
 class Environment:

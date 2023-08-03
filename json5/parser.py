@@ -12,11 +12,28 @@ import regex as re
 from sly import Parser  # type: ignore
 from sly.yacc import SlyLogger  # type: ignore
 
-from json5.model import *
-from json5.tokenizer import JSON5Token
-from json5.tokenizer import JSONLexer
-from json5.tokenizer import tokenize
-from json5.utils import JSON5DecodeError
+from .model import BlockComment
+from .model import BooleanLiteral
+from .model import Comment
+from .model import DoubleQuotedString
+from .model import Float
+from .model import Identifier
+from .model import Infinity
+from .model import Integer
+from .model import JSONArray
+from .model import JSONObject
+from .model import JSONText
+from .model import KeyValuePair
+from .model import LineComment
+from .model import NaN
+from .model import NullLiteral
+from .model import SingleQuotedString
+from .model import TrailingComma
+from .model import UnaryOp
+from .tokenizer import JSON5Token
+from .tokenizer import JSONLexer
+from .tokenizer import tokenize
+from .utils import JSON5DecodeError
 
 
 class QuietSlyLogger(SlyLogger):  # type: ignore[misc]
