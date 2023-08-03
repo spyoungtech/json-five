@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import typing
 from abc import abstractmethod
+from functools import singledispatchmethod
 from typing import Callable
 from typing import Literal
 
@@ -23,7 +24,6 @@ from json5.model import SingleQuotedString
 from json5.model import String
 from json5.model import UnaryOp
 from json5.parser import parse_source
-from json5.utils import singledispatchmethod
 
 logger = logging.getLogger(__name__)
 # logger.setLevel(level=logging.DEBUG)

@@ -5,10 +5,10 @@ import json
 import math
 import typing
 from abc import abstractmethod
+from functools import singledispatchmethod
 from typing import Any
 
 from .loader import JsonIdentifier
-from .utils import singledispatchmethod
 from json5.model import *
 
 
