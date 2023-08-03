@@ -5,6 +5,7 @@ repos:
     -   id: check-yaml
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
+        exclude: ^(tests/.*)
 -   repo: https://github.com/asottile/reorder-python-imports
     rev: v3.10.0
     hooks:
@@ -44,3 +45,4 @@ repos:
         args:
           - "--ignore"
           - "E501,E704,E301,W503,F405,F811,F821,F403,"
+        exclude: ^(tests/.*)

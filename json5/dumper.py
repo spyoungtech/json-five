@@ -200,8 +200,9 @@ class ModelDumper:
         self.env.write('{')
         if node.leading_wsc:
             self.process_leading_wsc(node)
-        num_pairs = len(node.key_value_pairs)
-        for index, kvp in enumerate(node.key_value_pairs, start=1):
+        key_value_pairs = node.key_value_pairs
+        num_pairs = len(key_value_pairs)
+        for index, kvp in enumerate(key_value_pairs, start=1):
             self.dump(kvp.key)
             self.env.write(':')
             self.dump(kvp.value)

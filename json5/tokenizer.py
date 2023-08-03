@@ -29,6 +29,19 @@ class JSON5Token(Token):  # type: ignore[misc]
         self.doc: str = doc
         self.end: int = tok.end
 
+    @property
+    def colno(self) -> int:
+        line_start_index = self.doc.rfind('\n', 0, self.index) + 1
+        return self.index - line_start_index
+
+    @property
+    def end_colno(self) -> int:
+        return self.colno + self.end - self.index
+
+    @property
+    def end_lineno(self) -> int:
+        return self.lineno + self.value.count('\n')
+
     __slots__ = ('type', 'value', 'lineno', 'index', 'doc', 'end')
 
     def __str__(self) -> str:
@@ -90,8 +103,15 @@ class JSONLexer(Lexer):  # type: ignore[misc]
     COLON = r"\:"
     COMMA = r"\,"
 
-    DOUBLE_QUOTE_STRING = r'"(?:[^"\\]|\\.)*"'
-    SINGLE_QUOTE_STRING = r"'(?:[^'\\]|\\.)*'"
+    @_(r'"(?:[^"\\]|\\.)*"')
+    def DOUBLE_QUOTE_STRING(self, tok: JSON5Token) -> JSON5Token:
+        self.lineno += tok.value.count('\n')
+        return tok
+
+    @_(r"'(?:[^'\\]|\\.)*'")
+    def SINGLE_QUOTE_STRING(self, tok: JSON5Token) -> JSON5Token:
+        self.lineno += tok.value.count('\n')
+        return tok
 
     LINE_COMMENT = r"//[^\n]*"
 

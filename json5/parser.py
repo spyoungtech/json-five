@@ -266,7 +266,7 @@ class JSONParser(Parser):  # type: ignore[misc]
             value.wsc_before.append(wsc)
         for wsc in p.wsc2:
             value.wsc_after.append(wsc)
-        return KeyValuePair(key=p.key, value=p.value, tok=key._tok, end_tok=value._end_tok)
+        return KeyValuePair(key=p.key, value=p.value)
 
     @_('object_delimiter_seen COMMA { wsc } [ first_key_value_pair ]')
     def subsequent_key_value_pair(self, p: SubsequentKeyValuePairProduction) -> KeyValuePair | TrailingComma:
@@ -340,14 +340,14 @@ class JSONParser(Parser):  # type: ignore[misc]
     @_('seen_LBRACE LBRACE { wsc } [ key_value_pairs ] seen_RBRACE RBRACE')
     def json_object(self, p: T_JsonObjectProduction) -> JSONObject:
         if not p.key_value_pairs:
-            node = JSONObject(leading_wsc=list(p.wsc or []), tok=p._slice[0], end_tok=p._slice[5])
+            node = JSONObject(leading_wsc=list(p.wsc or []), tok=p._slice[1], end_tok=p._slice[5])
         else:
             kvps, trailing_comma = p.key_value_pairs
             node = JSONObject(
                 *kvps,
                 trailing_comma=trailing_comma,
                 leading_wsc=list(p.wsc or []),
-                tok=p._slice[0],
+                tok=p._slice[1],
                 end_tok=p._slice[5],
             )
 

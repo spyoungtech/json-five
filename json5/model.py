@@ -5,6 +5,7 @@ import typing
 from collections import deque
 from typing import Any
 from typing import Literal
+from typing import NamedTuple
 
 from .tokenizer import JSON5Token
 
@@ -33,6 +34,11 @@ __all__ = [
     'LineComment',
     'BlockComment',
 ]
+
+
+class KeyValuePair(NamedTuple):
+    key: Key
+    value: Value
 
 
 def walk(root: Node) -> typing.Generator[Node, None, None]:
@@ -76,25 +82,13 @@ class Node:
     def col_offset(self) -> int | None:
         if self._tok is None:
             return None
-        return self._tok.index
+        return self._tok.colno
 
     @property
     def end_col_offset(self) -> int | None:
         if self._end_tok is None:
             return None
-
-        # TODO fix these cases in the tokenizer
-        if isinstance(self, (DoubleQuotedString, SingleQuotedString)):
-            if '\n' in self.raw_value:
-                return len(self.raw_value.rsplit('\n', 1)[-1])
-            else:
-                return self._end_tok.end
-        elif isinstance(self, BlockComment):
-            if '\n' in self.value:
-                return len(self.value.rsplit('\n', 1)[-1])
-            else:
-                return self._end_tok.end
-        return self._end_tok.end
+        return self._end_tok.end_colno
 
     @property
     def lineno(self) -> int | None:
@@ -107,14 +101,14 @@ class Node:
         if self._end_tok is None:
             return None
         r = self._end_tok.lineno
-        # TODO fix these cases in the tokenizer
-        if isinstance(self, (DoubleQuotedString, SingleQuotedString)):
-            return r + self.raw_value.count('\n')
-        elif isinstance(self, BlockComment):
-            return r + self.value.count('\n')
+        # # TODO fix these cases in the tokenizer
+        # if isinstance(self, (DoubleQuotedString, SingleQuotedString)):
+        #     return r + self.raw_value.count('\n')
+        # elif isinstance(self, BlockComment):
+        #     return r + self.value.count('\n')
         return r
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         rep = (
             f"{self.__class__.__name__}("
             + ", ".join(
@@ -157,15 +151,25 @@ class JSONObject(Value):
         tok: JSON5Token | None = None,
         end_tok: JSON5Token | None = None,
     ):
-        kvps = list(key_value_pairs)
-        for kvp in kvps:
-            assert isinstance(kvp, KeyValuePair), f"Expected key value pair, got {type(kvp)}"
+        keys: list[Key] = []
+        values: list[Value] = []
+        for key, value in key_value_pairs:
+            assert isinstance(key, Key)
+            assert isinstance(value, Value)
+            keys.append(key)
+            values.append(value)
+        assert len(keys) == len(values)
+        self.keys: list[Key] = keys
+        self.values: list[Value] = values
         assert leading_wsc is None or all(isinstance(item, str) or isinstance(item, Comment) for item in leading_wsc)
-        self.key_value_pairs: list[KeyValuePair] = kvps
         self.trailing_comma: TrailingComma | None = trailing_comma
         self.leading_wsc: list[str | Comment] = leading_wsc or []
 
         super().__init__(tok=tok, end_tok=end_tok)
+
+    @property
+    def key_value_pairs(self) -> list[KeyValuePair]:
+        return list(KeyValuePair(key, value) for key, value in zip(self.keys, self.values))
 
 
 class JSONArray(Value):
@@ -184,16 +188,6 @@ class JSONArray(Value):
         self.values: list[Value] = vals
         self.trailing_comma: TrailingComma | None = trailing_comma
         self.leading_wsc: list[str | Comment] = leading_wsc or []
-
-        super().__init__(tok=tok, end_tok=end_tok)
-
-
-class KeyValuePair(Node):
-    def __init__(self, key: Key, value: Value, tok: JSON5Token | None = None, end_tok: JSON5Token | None = None):
-        assert isinstance(key, Key)
-        assert isinstance(value, Value)
-        self.key: Key = key
-        self.value: Value = value
 
         super().__init__(tok=tok, end_tok=end_tok)
 
@@ -301,31 +295,23 @@ class NaN(Number):
 
 
 class String(Value, Key):
-    ...
+    def __init__(
+        self, characters: str, raw_value: str, tok: JSON5Token | None = None, end_tok: JSON5Token | None = None
+    ):
+        assert isinstance(raw_value, str)
+        assert isinstance(characters, str)
+        self.characters: str = characters
+        self.raw_value: str = raw_value
+
+        super().__init__(tok=tok, end_tok=tok)
 
 
 class DoubleQuotedString(String):
-    def __init__(
-        self, characters: str, raw_value: str, tok: JSON5Token | None = None, end_tok: JSON5Token | None = None
-    ):
-        assert isinstance(raw_value, str)
-        assert isinstance(characters, str)
-        self.characters: str = characters
-        self.raw_value: str = raw_value
-
-        super().__init__(tok=tok, end_tok=tok)
+    ...
 
 
 class SingleQuotedString(String):
-    def __init__(
-        self, characters: str, raw_value: str, tok: JSON5Token | None = None, end_tok: JSON5Token | None = None
-    ):
-        assert isinstance(raw_value, str)
-        assert isinstance(characters, str)
-        self.characters: str = characters
-        self.raw_value: str = raw_value
-
-        super().__init__(tok=tok, end_tok=tok)
+    ...
 
 
 class BooleanLiteral(Value):
