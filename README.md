@@ -35,7 +35,7 @@ For basic loading/dumping, the interface is nearly identical to that of the `jso
 ```python
 import json5
 json_text = """{ // This is a JSON5 comment
-"foo": "bar" /* this is a JSON5 block
+"foo": "bar", /* this is a JSON5 block
 comment that can span lines */
 bacon: "eggs"  // unquoted Identifiers also work
 }
