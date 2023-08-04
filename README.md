@@ -84,46 +84,15 @@ Example: a simple model
 
 ```python
 from json5.loader import loads, ModelLoader
-json_string = """{"foo": "bar"}"""
+json_string = """{foo: "bar"}"""
 model = loads(json_string, loader=ModelLoader())
 ```
-The model object looks something like this:
+The resulting model object looks something like this:
 ```python
 JSONText(
     value=JSONObject(
-        key_value_pairs=[
-            KeyValuePair(
-                key=DoubleQuotedString(
-                    characters="foo",
-                    raw_value='"foo"',
-                    tok=JSON5Token(
-                        type="DOUBLE_QUOTE_STRING",
-                        value='"foo"',
-                        lineno=1,
-                        index=1,
-                        end=None,
-                    ),
-                ),
-                value=DoubleQuotedString(
-                    characters="bar",
-                    raw_value='"bar"',
-                    tok=JSON5Token(
-                        type="DOUBLE_QUOTE_STRING",
-                        value='"bar"',
-                        lineno=1,
-                        index=8,
-                        end=None,
-                    ),
-                ),
-                tok=JSON5Token(
-                    type="DOUBLE_QUOTE_STRING",
-                    value='"foo"',
-                    lineno=1,
-                    index=1,
-                    end=None,
-                ),
-            )
-        ],
+        keys=[Identifier(name="foo", raw_value="foo")],
+        values=[DoubleQuotedString(characters="bar", raw_value='"bar"')],
         trailing_comma=None,
     )
 )
@@ -136,6 +105,26 @@ there is (currently) no validation to ensure your model edits won't result in in
 You may also implement custom loaders and dumpers to control serialization and deserialization. See the [full documentation](https://json-five.readthedocs.io/en/latest/extending.html#custom-loaders-and-dumpers)
 for more information.
 
+## Tokenization
+
+You can also leverage tokenization of JSON5:
+
+```python
+from json5.tokenizer import tokenize
+
+json_string = """{foo: "bar"}"""
+for tok in tokenize(json_string):
+    print(tok.type)
+```
+Output would be:
+```text
+LBRACE
+NAME
+COLON
+WHITESPACE
+DOUBLE_QUOTE_STRING
+RBRACE
+```
 
 # Status
 
