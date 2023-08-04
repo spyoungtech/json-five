@@ -12,11 +12,30 @@ import regex as re
 from sly import Parser  # type: ignore
 from sly.yacc import SlyLogger  # type: ignore
 
-from json5.model import *
-from json5.tokenizer import JSON5Token
-from json5.tokenizer import JSONLexer
-from json5.tokenizer import tokenize
-from json5.utils import JSON5DecodeError
+from .model import BlockComment
+from .model import BooleanLiteral
+from .model import Comment
+from .model import DoubleQuotedString
+from .model import Float
+from .model import Identifier
+from .model import Infinity
+from .model import Integer
+from .model import JSONArray
+from .model import JSONObject
+from .model import JSONText
+from .model import Key
+from .model import KeyValuePair
+from .model import LineComment
+from .model import NaN
+from .model import NullLiteral
+from .model import SingleQuotedString
+from .model import TrailingComma
+from .model import UnaryOp
+from .model import Value
+from .tokenizer import JSON5Token
+from .tokenizer import JSONLexer
+from .tokenizer import tokenize
+from .utils import JSON5DecodeError
 
 
 class QuietSlyLogger(SlyLogger):  # type: ignore[misc]
@@ -77,16 +96,21 @@ def unicode_escape_replace(matchobj: re.Match[str]) -> str:
     return _unicode_escape_replace(s)
 
 
-class T_TextProduction(Protocol):
-    wsc0: list[Comment | str]
-    wsc1: list[Comment | str]
-
-    def __getitem__(self, i: Literal[1]) -> Value:
+class T_TokenSlice(Protocol):
+    def __getitem__(self, item: int) -> JSON5Token:
         ...
 
 
-class T_TokenSlice(Protocol):
-    def __getitem__(self, item: int) -> JSON5Token:
+class T_AnyProduction(Protocol):
+    _slice: T_TokenSlice
+
+
+class T_TextProduction(Protocol):
+    wsc0: list[Comment | str]
+    wsc1: list[Comment | str]
+    value: Value
+
+    def __getitem__(self, i: Literal[1]) -> Value:
         ...
 
 
@@ -96,41 +120,47 @@ class T_FirstKeyValuePairProduction(Protocol):
     wsc2: list[Comment | str]
     key: Key
     value: Value
+    _slice: T_TokenSlice
 
     def __getitem__(self, item: int) -> Key | Value:
         ...
 
 
 class T_WSCProduction(Protocol):
+    _slice: T_TokenSlice
+
     def __getitem__(self, item: Literal[0]) -> str | Comment:
         ...
 
 
 class T_CommentProduction(Protocol):
+    _slice: T_TokenSlice
+
     def __getitem__(self, item: Literal[0]) -> str:
         ...
 
-    _slice: T_TokenSlice
-
 
 class T_KeyValuePairsProduction(Protocol):
+    _slice: T_TokenSlice
     first_key_value_pair: KeyValuePair
     subsequent_key_value_pair: list[KeyValuePair]
 
 
 class T_JsonObjectProduction(Protocol):
-    key_value_pairs: tuple[list[KeyValuePair], TrailingComma | None] | None
     _slice: T_TokenSlice
+    key_value_pairs: tuple[list[KeyValuePair], TrailingComma | None] | None
     wsc: list[Comment | str]
 
 
 class SubsequentKeyValuePairProduction(Protocol):
+    _slice: T_TokenSlice
     wsc: list[Comment | str]
     first_key_value_pair: KeyValuePair | None
-    _slice: T_TokenSlice
 
 
 class T_FirstArrayValueProduction(Protocol):
+    _slice: T_TokenSlice
+
     def __getitem__(self, item: Literal[1]) -> Value:
         ...
 
@@ -138,27 +168,28 @@ class T_FirstArrayValueProduction(Protocol):
 
 
 class T_SubsequentArrayValueProduction(Protocol):
+    _slice: T_TokenSlice
     first_array_value: Value | None
     wsc: list[Comment | str]
-    _slice: T_TokenSlice
 
 
 class T_ArrayValuesProduction(Protocol):
+    _slice: T_TokenSlice
     first_array_value: Value
     subsequent_array_value: list[Value]
 
 
 class T_JsonArrayProduction(Protocol):
-    array_values: tuple[list[Value], TrailingComma | None] | None
     _slice: T_TokenSlice
+    array_values: tuple[list[Value], TrailingComma | None] | None
     wsc: list[Comment | str]
 
 
 class T_IdentifierProduction(Protocol):
+    _slice: T_TokenSlice
+
     def __getitem__(self, item: Literal[0]) -> str:
         ...
-
-    _slice: T_TokenSlice
 
 
 class T_KeyProduction(Protocol):
@@ -167,34 +198,41 @@ class T_KeyProduction(Protocol):
 
 
 class T_NumberProduction(Protocol):
+    _slice: T_TokenSlice
+
     def __getitem__(self, item: Literal[0]) -> str:
         ...
 
-    _slice: T_TokenSlice
-
 
 class T_ValueNumberProduction(Protocol):
+    _slice: T_TokenSlice
     number: Infinity | NaN | Float | Integer
 
 
 class T_ExponentNotationProduction(Protocol):
+    _slice: T_TokenSlice
+
     def __getitem__(self, item: int) -> str:
         ...
 
 
 class T_StringTokenProduction(Protocol):
+    _slice: T_TokenSlice
+
     def __getitem__(self, item: Literal[0]) -> str:
         ...
 
-    _slice: T_TokenSlice
-
 
 class T_StringProduction(Protocol):
+    _slice: T_TokenSlice
+
     def __getitem__(self, item: Literal[0]) -> DoubleQuotedString | SingleQuotedString:
         ...
 
 
 class T_ValueProduction(Protocol):
+    _slice: T_TokenSlice
+
     def __getitem__(
         self, item: Literal[0]
     ) -> (
@@ -230,7 +268,7 @@ class JSONParser(Parser):  # type: ignore[misc]
 
     @_('{ wsc } value { wsc }')
     def text(self, p: T_TextProduction) -> JSONText:
-        node = JSONText(value=p[1])
+        node = JSONText(value=p[1], tok=p.value._tok)
         for wsc in p.wsc0:
             node.wsc_before.append(wsc)
         for wsc in p.wsc1:
@@ -247,7 +285,7 @@ class JSONParser(Parser):  # type: ignore[misc]
             value.wsc_before.append(wsc)
         for wsc in p.wsc2:
             value.wsc_after.append(wsc)
-        return KeyValuePair(key=p.key, value=p.value, tok=getattr(key, 'tok'))
+        return KeyValuePair(key=p.key, value=p.value)
 
     @_('object_delimiter_seen COMMA { wsc } [ first_key_value_pair ]')
     def subsequent_key_value_pair(self, p: SubsequentKeyValuePairProduction) -> KeyValuePair | TrailingComma:
@@ -283,7 +321,7 @@ class JSONParser(Parser):  # type: ignore[misc]
         for index, value in enumerate(p.subsequent_key_value_pair):
             if isinstance(value, TrailingComma):
                 if index + 1 != num_sqvp:
-                    offending_token = value.tok
+                    offending_token = value._tok
                     self.errors.append(JSON5DecodeError("Syntax Error: multiple trailing commas", offending_token))
                 return ret, value
             else:
@@ -321,10 +359,16 @@ class JSONParser(Parser):  # type: ignore[misc]
     @_('seen_LBRACE LBRACE { wsc } [ key_value_pairs ] seen_RBRACE RBRACE')
     def json_object(self, p: T_JsonObjectProduction) -> JSONObject:
         if not p.key_value_pairs:
-            node = JSONObject(leading_wsc=list(p.wsc or []), tok=p._slice[0])
+            node = JSONObject(leading_wsc=list(p.wsc or []), tok=p._slice[1], end_tok=p._slice[5])
         else:
             kvps, trailing_comma = p.key_value_pairs
-            node = JSONObject(*kvps, trailing_comma=trailing_comma, leading_wsc=list(p.wsc or []), tok=p._slice[0])
+            node = JSONObject(
+                *kvps,
+                trailing_comma=trailing_comma,
+                leading_wsc=list(p.wsc or []),
+                tok=p._slice[1],
+                end_tok=p._slice[5],
+            )
 
         return node
 
@@ -357,7 +401,7 @@ class JSONParser(Parser):  # type: ignore[misc]
         for index, value in enumerate(p.subsequent_array_value):
             if isinstance(value, TrailingComma):
                 if index + 1 != num_values:
-                    self.errors.append(JSON5DecodeError("Syntax Error: multiple trailing commas", value.tok))
+                    self.errors.append(JSON5DecodeError("Syntax Error: multiple trailing commas", value._tok))
                     return ret, value
                 return ret, value
             else:
@@ -367,10 +411,10 @@ class JSONParser(Parser):  # type: ignore[misc]
     @_('seen_LBRACKET LBRACKET { wsc } [ array_values ] seen_RBRACKET RBRACKET')
     def json_array(self, p: T_JsonArrayProduction) -> JSONArray:
         if not p.array_values:
-            node = JSONArray(tok=p._slice[1])
+            node = JSONArray(tok=p._slice[1], end_tok=p._slice[5])
         else:
             values, trailing_comma = p.array_values
-            node = JSONArray(*values, trailing_comma=trailing_comma, tok=p._slice[1])
+            node = JSONArray(*values, trailing_comma=trailing_comma, tok=p._slice[1], end_tok=p._slice[5])
 
         for wsc in p.wsc:
             node.leading_wsc.append(wsc)
@@ -430,33 +474,33 @@ class JSONParser(Parser):  # type: ignore[misc]
         return Integer(raw_value, is_octal=True, tok=p._slice[0])
 
     @_('INFINITY')  # type: ignore[no-redef]
-    def number(self, p: Any) -> Infinity:
-        return Infinity()
+    def number(self, p: T_AnyProduction) -> Infinity:
+        return Infinity(tok=p._slice[0])
 
     @_('NAN')  # type: ignore[no-redef]
-    def number(self, p: Any) -> NaN:
-        return NaN()
+    def number(self, p: T_AnyProduction) -> NaN:
+        return NaN(tok=p._slice[0])
 
     @_('MINUS number')
     def value(self, p: T_ValueNumberProduction) -> UnaryOp:
         if isinstance(p.number, Infinity):
             p.number.negative = True
-        node = UnaryOp(op='-', value=p.number)
+        node = UnaryOp(op='-', value=p.number, tok=p._slice[0], end_tok=p.number._end_tok)
         return node
 
     @_('PLUS number')  # type: ignore[no-redef]
     def value(self, p: T_ValueNumberProduction):
-        node = UnaryOp(op='+', value=p.number)
+        node = UnaryOp(op='+', value=p.number, tok=p._slice[0], end_tok=p.number._end_tok)
         return node
 
     @_('INTEGER EXPONENT', 'FLOAT EXPONENT')  # type: ignore[no-redef]
     def number(self, p: T_ExponentNotationProduction) -> Float:
         exp_notation = p[1][0]  # e or E
-        return Float(p[0] + p[1], exp_notation=exp_notation)
+        return Float(p[0] + p[1], exp_notation=exp_notation, tok=p._slice[0], end_tok=p._slice[1])
 
     @_('HEXADECIMAL')  # type: ignore[no-redef]
     def number(self, p: T_NumberProduction) -> Integer:
-        return Integer(p[0], is_hex=True)
+        return Integer(p[0], is_hex=True, tok=p._slice[0])
 
     @_('DOUBLE_QUOTE_STRING')
     def double_quoted_string(self, p: T_StringTokenProduction) -> DoubleQuotedString:
@@ -517,16 +561,16 @@ class JSONParser(Parser):  # type: ignore[misc]
         return p[0]
 
     @_('TRUE')
-    def boolean(self, p: Any) -> BooleanLiteral:
-        return BooleanLiteral(True)
+    def boolean(self, p: T_AnyProduction) -> BooleanLiteral:
+        return BooleanLiteral(True, tok=p._slice[0])
 
     @_('FALSE')  # type: ignore[no-redef]
-    def boolean(self, p: Any) -> BooleanLiteral:
-        return BooleanLiteral(False)
+    def boolean(self, p: T_AnyProduction) -> BooleanLiteral:
+        return BooleanLiteral(False, tok=p._slice[0])
 
     @_('NULL')
-    def null(self, p: Any) -> NullLiteral:
-        return NullLiteral()
+    def null(self, p: T_AnyProduction) -> NullLiteral:
+        return NullLiteral(tok=p._slice[0])
 
     @_(  # type: ignore[no-redef]
         'string',
@@ -558,8 +602,8 @@ class JSONParser(Parser):  # type: ignore[misc]
         self.error(p._slice[0])
         raw = p[0]
         if raw.startswith('"'):
-            return DoubleQuotedString(raw[1:], raw_value=raw)
-        return SingleQuotedString(raw[1:], raw_value=raw)
+            return DoubleQuotedString(raw[1:], raw_value=raw, tok=p._slice[0])
+        return SingleQuotedString(raw[1:], raw_value=raw, tok=p._slice[0])
 
     def error(self, token: JSON5Token | None) -> JSON5Token | None:
         if token:

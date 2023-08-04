@@ -5,11 +5,31 @@ import json
 import math
 import typing
 from abc import abstractmethod
+from functools import singledispatchmethod
 from typing import Any
 
 from .loader import JsonIdentifier
-from .utils import singledispatchmethod
-from json5.model import *
+from .model import BlockComment
+from .model import BooleanLiteral
+from .model import Comment
+from .model import DoubleQuotedString
+from .model import Float
+from .model import Identifier
+from .model import Infinity
+from .model import Integer
+from .model import JSONArray
+from .model import JSONObject
+from .model import JSONText
+from .model import KeyValuePair
+from .model import LineComment
+from .model import NaN
+from .model import Node
+from .model import NullLiteral
+from .model import SingleQuotedString
+from .model import String
+from .model import TrailingComma
+from .model import UnaryOp
+from .model import Value
 
 
 class Environment:
@@ -200,8 +220,9 @@ class ModelDumper:
         self.env.write('{')
         if node.leading_wsc:
             self.process_leading_wsc(node)
-        num_pairs = len(node.key_value_pairs)
-        for index, kvp in enumerate(node.key_value_pairs, start=1):
+        key_value_pairs = node.key_value_pairs
+        num_pairs = len(key_value_pairs)
+        for index, kvp in enumerate(key_value_pairs, start=1):
             self.dump(kvp.key)
             self.env.write(':')
             self.dump(kvp.value)

@@ -1,4 +1,4 @@
-sly
+sly>=0.5
 regex
 pytest
 mypy

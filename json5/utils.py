@@ -1,28 +1,9 @@
 from __future__ import annotations
 
 import typing
-from functools import singledispatch
-from functools import update_wrapper
 from json import JSONDecodeError
-from typing import Any
-from typing import Callable
 
-try:
-    from functools import singledispatchmethod
-except ImportError:
-
-    def singledispatchmethod(func: Callable[..., Any]) -> Any:  # type: ignore[no-redef]
-        dispatcher = singledispatch(func)
-
-        def wrapper(*args: Any, **kwargs: Any) -> Any:
-            return dispatcher.dispatch(args[1].__class__)(*args, **kwargs)
-
-        wrapper.register = dispatcher.register  # type: ignore[attr-defined]
-        update_wrapper(wrapper, func)
-        return wrapper
-
-
-__all__ = ['singledispatchmethod', 'JSON5DecodeError']
+__all__ = ['JSON5DecodeError']
 
 if typing.TYPE_CHECKING:
     from .tokenizer import JSON5Token

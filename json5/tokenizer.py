@@ -9,7 +9,7 @@ import regex as re
 from sly import Lexer  # type: ignore
 from sly.lex import Token  # type: ignore
 
-from json5.utils import JSON5DecodeError
+from .utils import JSON5DecodeError
 
 logger = logging.getLogger(__name__)
 # logger.addHandler(logging.StreamHandler(stream=sys.stderr))
@@ -22,14 +22,33 @@ class JSON5Token(Token):  # type: ignore[misc]
     '''
 
     def __init__(self, tok: Token, doc: str):
-        self.type = tok.type
-        self.value = tok.value
-        self.lineno = tok.lineno
-        self.index = tok.index
-        self.doc = doc
-        self.end = getattr(tok, 'end', None)
+        self.type: str | None = tok.type
+        self.value: str = tok.value
+        self.lineno: int = tok.lineno
+        self.index: int = tok.index
+        self.doc: str = doc
+        self.end: int = tok.end
+
+    @property
+    def colno(self) -> int:
+        line_start_index = self.doc.rfind('\n', 0, self.index) + 1
+        return self.index - line_start_index
+
+    @property
+    def end_colno(self) -> int:
+        return self.colno + self.end - self.index
+
+    @property
+    def end_lineno(self) -> int:
+        return self.lineno + self.value.count('\n')
 
     __slots__ = ('type', 'value', 'lineno', 'index', 'doc', 'end')
+
+    def __str__(self) -> str:
+        if self.value:
+            return self.value
+        else:
+            return ''
 
     def __repr__(self) -> str:
         return f'JSON5Token(type={self.type!r}, value={self.value!r}, lineno={self.lineno}, index={self.index}, end={self.end})'
@@ -84,8 +103,15 @@ class JSONLexer(Lexer):  # type: ignore[misc]
     COLON = r"\:"
     COMMA = r"\,"
 
-    DOUBLE_QUOTE_STRING = r'"(?:[^"\\]|\\.)*"'
-    SINGLE_QUOTE_STRING = r"'(?:[^'\\]|\\.)*'"
+    @_(r'"(?:[^"\\]|\\.)*"')
+    def DOUBLE_QUOTE_STRING(self, tok: JSON5Token) -> JSON5Token:
+        self.lineno += tok.value.count('\n')
+        return tok
+
+    @_(r"'(?:[^'\\]|\\.)*'")
+    def SINGLE_QUOTE_STRING(self, tok: JSON5Token) -> JSON5Token:
+        self.lineno += tok.value.count('\n')
+        return tok
 
     LINE_COMMENT = r"//[^\n]*"
 
@@ -125,3 +151,9 @@ def tokenize(text: str) -> Generator[JSON5Token, None, None]:
     lexer = JSONLexer()
     tokens = lexer.tokenize(text)
     return tokens
+
+
+def reversed_enumerate(tokens: typing.Sequence[JSON5Token]) -> typing.Generator[tuple[int, JSON5Token], None, None]:
+    for i in reversed(range(len(tokens))):
+        tok = tokens[i]
+        yield i, tok
