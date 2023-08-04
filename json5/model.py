@@ -108,7 +108,7 @@ class Node:
         #     return r + self.value.count('\n')
         return r
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         rep = (
             f"{self.__class__.__name__}("
             + ", ".join(
