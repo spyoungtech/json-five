@@ -100,12 +100,7 @@ class Node:
     def end_lineno(self) -> int | None:
         if self._end_tok is None:
             return None
-        r = self._end_tok.lineno
-        # # TODO fix these cases in the tokenizer
-        # if isinstance(self, (DoubleQuotedString, SingleQuotedString)):
-        #     return r + self.raw_value.count('\n')
-        # elif isinstance(self, BlockComment):
-        #     return r + self.value.count('\n')
+        r = self._end_tok.end_lineno
         return r
 
     def __repr__(self) -> str:
