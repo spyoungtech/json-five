@@ -23,6 +23,7 @@ from .model import Integer
 from .model import JSONArray
 from .model import JSONObject
 from .model import JSONText
+from .model import Key
 from .model import KeyValuePair
 from .model import LineComment
 from .model import NaN
@@ -30,6 +31,7 @@ from .model import NullLiteral
 from .model import SingleQuotedString
 from .model import TrailingComma
 from .model import UnaryOp
+from .model import Value
 from .tokenizer import JSON5Token
 from .tokenizer import JSONLexer
 from .tokenizer import tokenize
