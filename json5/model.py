@@ -133,8 +133,7 @@ class Value(Node):
     pass
 
 
-class Key(Node):
-    ...
+class Key(Node): ...
 
 
 class JSONObject(Value):
@@ -208,8 +207,7 @@ class Identifier(Key):
         return hash(self) == hash(other)
 
 
-class Number(Value):
-    ...
+class Number(Value): ...
 
 
 class Integer(Number):
@@ -301,12 +299,10 @@ class String(Value, Key):
         super().__init__(tok=tok, end_tok=tok)
 
 
-class DoubleQuotedString(String):
-    ...
+class DoubleQuotedString(String): ...
 
 
-class SingleQuotedString(String):
-    ...
+class SingleQuotedString(String): ...
 
 
 class BooleanLiteral(Value):
@@ -348,9 +344,7 @@ class Comment(Node):
         super().__init__(tok=tok, end_tok=tok)  # Comments are always a single token
 
 
-class LineComment(Comment):
-    ...
+class LineComment(Comment): ...
 
 
-class BlockComment(Comment):
-    ...
+class BlockComment(Comment): ...
