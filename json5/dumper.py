@@ -89,8 +89,9 @@ class DefaultDumper(BaseDumper):
     def dict_to_json(self, d: dict[Any, Any]) -> Any:
         self.env.write('{', indent=0)
         if self.env.indent:
-            self.env.write('\n')
+            self.env.write('\n', indent=0)
             self.env.indent_level += 1
+        index = 0
         for index, (key, value) in enumerate(d.items(), start=1):
             if self.env.indent:
                 self.env.write('')
@@ -107,7 +108,8 @@ class DefaultDumper(BaseDumper):
 
         if self.env.indent:
             self.env.indent_level -= 1
-            self.env.write('\n')
+            if index != 0:
+                self.env.write('\n', indent=0)
             self.env.write('}')
         else:
             self.env.write('}', indent=0)
