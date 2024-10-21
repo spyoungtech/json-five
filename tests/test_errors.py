@@ -20,8 +20,7 @@ def test_loading_comment_raises_runtime_error_default_loader():
 
 
 def test_loading_unknown_node_raises_error():
-    class Foo:
-        ...
+    class Foo: ...
 
     f = Foo()
     with pytest.raises(NotImplementedError):
@@ -29,8 +28,7 @@ def test_loading_unknown_node_raises_error():
 
 
 def test_dumping_unknown_node_raises_error():
-    class Foo:
-        ...
+    class Foo: ...
 
     f = Foo()
     with pytest.raises(NotImplementedError):
@@ -38,8 +36,7 @@ def test_dumping_unknown_node_raises_error():
 
 
 def test_known_type_in_wsc_raises_error():
-    class Foo:
-        ...
+    class Foo: ...
 
     f = Foo()
     model = loads('{foo: "bar"}', loader=ModelLoader())
@@ -53,8 +50,7 @@ def test_known_type_in_wsc_raises_error():
 
 
 def test_modelizing_unknown_object_raises_error():
-    class Foo:
-        ...
+    class Foo: ...
 
     f = Foo()
     with pytest.raises(NotImplementedError):
@@ -62,8 +58,7 @@ def test_modelizing_unknown_object_raises_error():
 
 
 def test_model_dumper_raises_error_for_unknown_node():
-    class Foo:
-        ...
+    class Foo: ...
 
     f = Foo()
     with pytest.raises(NotImplementedError):
