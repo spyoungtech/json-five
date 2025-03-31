@@ -48,11 +48,11 @@ class QuietSlyLogger(SlyLogger):  # type: ignore[misc]
 
 ESCAPE_SEQUENCES = {
     'b': '\u0008',
-    'f': '\u000C',
-    'n': '\u000A',
-    'r': '\u000D',
+    'f': '\u000c',
+    'n': '\u000a',
+    'r': '\u000d',
     't': '\u0009',
-    'v': '\u000B',
+    'v': '\u000b',
     '0': '\u0000',
     '\\': '\u005c',
     '"': '\u0022',
@@ -97,8 +97,7 @@ def unicode_escape_replace(matchobj: re.Match[str]) -> str:
 
 
 class T_TokenSlice(Protocol):
-    def __getitem__(self, item: int) -> JSON5Token:
-        ...
+    def __getitem__(self, item: int) -> JSON5Token: ...
 
 
 class T_AnyProduction(Protocol):
@@ -110,8 +109,7 @@ class T_TextProduction(Protocol):
     wsc1: list[Comment | str]
     value: Value
 
-    def __getitem__(self, i: Literal[1]) -> Value:
-        ...
+    def __getitem__(self, i: Literal[1]) -> Value: ...
 
 
 class T_FirstKeyValuePairProduction(Protocol):
@@ -122,22 +120,19 @@ class T_FirstKeyValuePairProduction(Protocol):
     value: Value
     _slice: T_TokenSlice
 
-    def __getitem__(self, item: int) -> Key | Value:
-        ...
+    def __getitem__(self, item: int) -> Key | Value: ...
 
 
 class T_WSCProduction(Protocol):
     _slice: T_TokenSlice
 
-    def __getitem__(self, item: Literal[0]) -> str | Comment:
-        ...
+    def __getitem__(self, item: Literal[0]) -> str | Comment: ...
 
 
 class T_CommentProduction(Protocol):
     _slice: T_TokenSlice
 
-    def __getitem__(self, item: Literal[0]) -> str:
-        ...
+    def __getitem__(self, item: Literal[0]) -> str: ...
 
 
 class T_KeyValuePairsProduction(Protocol):
@@ -161,8 +156,7 @@ class SubsequentKeyValuePairProduction(Protocol):
 class T_FirstArrayValueProduction(Protocol):
     _slice: T_TokenSlice
 
-    def __getitem__(self, item: Literal[1]) -> Value:
-        ...
+    def __getitem__(self, item: Literal[1]) -> Value: ...
 
     wsc: list[Comment | str]
 
@@ -188,20 +182,17 @@ class T_JsonArrayProduction(Protocol):
 class T_IdentifierProduction(Protocol):
     _slice: T_TokenSlice
 
-    def __getitem__(self, item: Literal[0]) -> str:
-        ...
+    def __getitem__(self, item: Literal[0]) -> str: ...
 
 
 class T_KeyProduction(Protocol):
-    def __getitem__(self, item: Literal[1]) -> Identifier | DoubleQuotedString | SingleQuotedString:
-        ...
+    def __getitem__(self, item: Literal[1]) -> Identifier | DoubleQuotedString | SingleQuotedString: ...
 
 
 class T_NumberProduction(Protocol):
     _slice: T_TokenSlice
 
-    def __getitem__(self, item: Literal[0]) -> str:
-        ...
+    def __getitem__(self, item: Literal[0]) -> str: ...
 
 
 class T_ValueNumberProduction(Protocol):
@@ -212,22 +203,19 @@ class T_ValueNumberProduction(Protocol):
 class T_ExponentNotationProduction(Protocol):
     _slice: T_TokenSlice
 
-    def __getitem__(self, item: int) -> str:
-        ...
+    def __getitem__(self, item: int) -> str: ...
 
 
 class T_StringTokenProduction(Protocol):
     _slice: T_TokenSlice
 
-    def __getitem__(self, item: Literal[0]) -> str:
-        ...
+    def __getitem__(self, item: Literal[0]) -> str: ...
 
 
 class T_StringProduction(Protocol):
     _slice: T_TokenSlice
 
-    def __getitem__(self, item: Literal[0]) -> DoubleQuotedString | SingleQuotedString:
-        ...
+    def __getitem__(self, item: Literal[0]) -> DoubleQuotedString | SingleQuotedString: ...
 
 
 class T_ValueProduction(Protocol):
@@ -246,8 +234,7 @@ class T_ValueProduction(Protocol):
         | Integer
         | Float
         | NaN
-    ):
-        ...
+    ): ...
 
 
 T_CallArg = typing.TypeVar('T_CallArg')
@@ -642,7 +629,7 @@ class JSONParser(Parser):  # type: ignore[misc]
             self.errors.append(JSON5DecodeError('Expecting value. Received unexpected EOF', None))
         return None
 
-    def _token_gen(self, tokens: typing.Iterable[JSON5Token]) -> typing.Generator[JSON5Token, None, None]:
+    def _token_gen(self, tokens: typing.Iterable[JSON5Token]) -> typing.Generator[JSON5Token]:
         for tok in tokens:
             self.last_token = tok
             self.seen_tokens.append(tok)
