@@ -131,3 +131,5 @@ RBRACE
 This project currently fully supports the JSON5 spec and its interfaces for loading and dumping JSON5 is stable as of v1.0.0.
 There is still active development underway, particularly for the underlying abstract JSON5 model representations and
 ability to perform edits using the abstract model.
+
+In the future, this project may take advantage of its sister project currently being developed in Rust: [json-five-rs](https://github.com/spyoungtech/json-five-rs).
