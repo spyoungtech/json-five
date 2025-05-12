@@ -166,6 +166,28 @@ class JSONObject(Value):
     def key_value_pairs(self) -> list[KeyValuePair]:
         return list(KeyValuePair(key, value) for key, value in zip(self.keys, self.values))
 
+    def find_key_value_pair(self, key):
+        for key_value_pair in self.key_value_pairs:
+            compare_key =  key_value_pair.key
+            if isinstance(compare_key, String):
+                if compare_key.characters == key:
+                    return key_value_pair
+            elif isinstance(compare_key, Identifier):
+                if compare_key.name == key:
+                    return key_value_pair
+            else:
+                raise NotImplementedError(f"node type not handled as object key: {compare_key}")
+        raise KeyError(key)
+
+    def __getitem__(self, key: Key) -> Value:
+        return self.find_key_value_pair(key).value
+
+    def __setitem__(self, key: Key, value: Value):
+        try:
+            self.find_key_value_pair(key).value = value
+        except KeyError:
+            self.key_value_pairs.append(KeyValuePair(KeyValuePair(key, value)))
+
 
 class JSONArray(Value):
     def __init__(
