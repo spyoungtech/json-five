@@ -91,7 +91,7 @@ class JSONLexer(Lexer):  # type: ignore[misc]
         OCTAL,  # Not allowed, but we capture as a token to raise error later
     }
 
-    def tokenize(self, text: str, lineno: int = 1, index: int = 0) -> Generator[JSON5Token, None, None]:
+    def tokenize(self, text: str, lineno: int = 1, index: int = 0) -> Generator[JSON5Token]:
         for tok in super().tokenize(text, lineno, index):
             tok = JSON5Token(tok, text)
             yield tok
@@ -120,7 +120,7 @@ class JSONLexer(Lexer):  # type: ignore[misc]
         self.lineno += tok.value.count('\n')
         return tok
 
-    @_("[\u0009\u000A\u000B\u000C\u000D\u0020\u00A0\u2028\u2029\ufeff]+")
+    @_("[\u0009\u000a\u000b\u000c\u000d\u0020\u00a0\u2028\u2029\ufeff]+")
     def WHITESPACE(self, tok: JSON5Token) -> JSON5Token:
         self.lineno += tok.value.count('\n')
         return tok
@@ -147,13 +147,13 @@ class JSONLexer(Lexer):  # type: ignore[misc]
         raise JSON5DecodeError(f'Illegal character {t.value[0]!r} at index {self.index}', None)
 
 
-def tokenize(text: str) -> Generator[JSON5Token, None, None]:
+def tokenize(text: str) -> Generator[JSON5Token]:
     lexer = JSONLexer()
     tokens = lexer.tokenize(text)
     return tokens
 
 
-def reversed_enumerate(tokens: typing.Sequence[JSON5Token]) -> typing.Generator[tuple[int, JSON5Token], None, None]:
+def reversed_enumerate(tokens: typing.Sequence[JSON5Token]) -> typing.Generator[tuple[int, JSON5Token]]:
     for i in reversed(range(len(tokens))):
         tok = tokens[i]
         yield i, tok
