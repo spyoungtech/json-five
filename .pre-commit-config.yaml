@@ -21,10 +21,10 @@ repos:
             - "120"
 
 -   repo: https://github.com/asottile/pyupgrade
-    rev: v3.15.0
+    rev: v3.21.2
     hooks:
     -   id: pyupgrade
-        args: ["--py38-plus"]
+        args: ["--py38-plus", "--keep-runtime-typing"]
 
 -   repo: https://github.com/pre-commit/mirrors-mypy
     rev: 'v1.6.1'
