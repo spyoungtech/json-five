@@ -41,7 +41,7 @@ class KeyValuePair(NamedTuple):
     value: Value
 
 
-def walk(root: Node) -> typing.Generator[Node, None, None]:
+def walk(root: Node) -> typing.Generator[Node]:
     todo = deque([root])
     while todo:
         node: Node = todo.popleft()
@@ -49,7 +49,7 @@ def walk(root: Node) -> typing.Generator[Node, None, None]:
         yield node
 
 
-def iter_child_nodes(node: Node) -> typing.Generator[Node, None, None]:
+def iter_child_nodes(node: Node) -> typing.Generator[Node]:
     for attr, value in iter_fields(node):
         if isinstance(value, Node):
             yield value
@@ -59,7 +59,7 @@ def iter_child_nodes(node: Node) -> typing.Generator[Node, None, None]:
                     yield item
 
 
-def iter_fields(node: Node) -> typing.Generator[tuple[str, Any], None, None]:
+def iter_fields(node: Node) -> typing.Generator[tuple[str, Any]]:
     for field_name in node._fields:
         try:
             value = getattr(node, field_name)
@@ -133,8 +133,7 @@ class Value(Node):
     pass
 
 
-class Key(Node):
-    ...
+class Key(Node): ...
 
 
 class JSONObject(Value):
@@ -208,8 +207,7 @@ class Identifier(Key):
         return hash(self) == hash(other)
 
 
-class Number(Value):
-    ...
+class Number(Value): ...
 
 
 class Integer(Number):
@@ -301,12 +299,10 @@ class String(Value, Key):
         super().__init__(tok=tok, end_tok=tok)
 
 
-class DoubleQuotedString(String):
-    ...
+class DoubleQuotedString(String): ...
 
 
-class SingleQuotedString(String):
-    ...
+class SingleQuotedString(String): ...
 
 
 class BooleanLiteral(Value):
@@ -348,9 +344,7 @@ class Comment(Node):
         super().__init__(tok=tok, end_tok=tok)  # Comments are always a single token
 
 
-class LineComment(Comment):
-    ...
+class LineComment(Comment): ...
 
 
-class BlockComment(Comment):
-    ...
+class BlockComment(Comment): ...
