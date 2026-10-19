@@ -46,14 +46,13 @@ class Environment:
         self.parse_int: Callable[[str], typing.Any] | None = parse_int
         self.parse_constant: Callable[[Literal['-Infinity', 'Infinity', 'NaN']], typing.Any] | None = parse_constant
         self.strict: bool = strict
-        self.object_pairs_hook: None | (
-            Callable[[list[tuple[str | JsonIdentifier, typing.Any]]], typing.Any]
-        ) = object_pairs_hook
+        self.object_pairs_hook: None | (Callable[[list[tuple[str | JsonIdentifier, typing.Any]]], typing.Any]) = (
+            object_pairs_hook
+        )
         self.parse_json5_identifiers: Callable[[JsonIdentifier], typing.Any] | None = parse_json5_identifiers
 
 
-class JsonIdentifier(str):
-    ...
+class JsonIdentifier(str): ...
 
 
 def load(
